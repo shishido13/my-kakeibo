@@ -1,0 +1,28 @@
+services:
+  # バックエンド (FastAPI)
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+      - backend_db:/app/db_data # SQLiteファイルを永続化
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./db_data/kakeibo.db
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
+
+  # フロントエンド (Vue.js)
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # コンテナ内のnode_modulesを優先
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  backend_db:
