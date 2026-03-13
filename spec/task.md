@@ -40,3 +40,8 @@
   - [x] `.vscode/tasks.json` の作成
   - [x] `.vscode/launch.json` の作成
   - [x] 動作確認とユーザー案内
+
+- [/] **フェーズ 7: GitHub リポジトリ設定**
+  - [x] `.gitignore` の作成
+  - [x] Git 初期化・初回のコミット
+  - [ ] リモートリポジトリへのプッシュ
