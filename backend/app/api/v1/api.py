@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from app.api.v1 import transactions, categories, payers, analytics, receipts
+
+from app.api.v1 import transactions, categories, payers, receipts
 
 api_router = APIRouter()
-api_router.include_router(transactions.router, prefix="/transactions", tags=["transactions"])
-api_router.include_router(categories.router, prefix="/categories", tags=["categories"])
-api_router.include_router(payers.router, prefix="/payers", tags=["payers"])
-api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
-api_router.include_router(receipts.router, prefix="/receipts", tags=["receipts"])
+
+api_router.include_router(transactions.router, prefix="/transactions", tags=["Transactions"])
+api_router.include_router(categories.router, prefix="/categories", tags=["Categories"])
+api_router.include_router(payers.router, prefix="/payers", tags=["Payers"])
+api_router.include_router(receipts.router, prefix="/receipts", tags=["Receipts"])

@@ -41,7 +41,15 @@
   - [x] `.vscode/launch.json` の作成
   - [x] 動作確認とユーザー案内
 
-- [/] **フェーズ 7: GitHub リポジトリ設定**
+- [x] **フェーズ 7: GitHub リポジトリ設定**
   - [x] `.gitignore` の作成
   - [x] Git 初期化・初回のコミット
-  - [ ] リモートリポジトリへのプッシュ
+  - [x] リモートリポジトリへのプッシュ
+
+- [/] **フェーズ 2: PDF一括登録機能 (20260314 実装)**
+  - [x] **スキーマ更新**: `Transaction` の `source_type` 制約強化
+  - [x] **バックエンドAI連携**: `google-genai` (Gemini 2.5 Flash) の導入とプロンプト構築
+  - [x] **バックエンドAPI**: `/api/v1/receipts/analyze` でPDFを受け取りAIへ渡す処理
+  - [x] **フロントエンド状態管理**: `useImportStore.ts` の作成
+  - [x] **フロントエンドUI**: `ImportVerifyView.vue` (PDFプレビュー＆データテーブル) の実装
+  - [x] **E2Eテスト**: PDFアップロード〜AI解析〜DB登録の一連のテスト

@@ -1,11 +1,38 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useTransactionStore } from '../stores/transaction';
+import { useImportStore } from '../stores/useImportStore';
+import { useRouter } from 'vue-router';
 import TransactionList from '../components/TransactionList.vue';
 import TransactionForm from '../components/TransactionForm.vue';
 
 const store = useTransactionStore();
+const importStore = useImportStore();
+const router = useRouter();
 const isModalOpen = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+const triggerFileInput = () => {
+    fileInput.value?.click();
+};
+
+const handleFileUpload = async (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+        const file = target.files[0];
+        importStore.setFile(file);
+        
+        // Navigate to the import verify view
+        router.push('/import');
+        
+        // Start analyzing implicitly
+        importStore.analyzePdf().catch(e => {
+             console.error('Initial analysis failed', e);
+             // Error state is handled within the view
+        });
+    }
+    target.value = '';
+};
 
 onMounted(async () => {
   await Promise.all([
@@ -35,10 +62,17 @@ const formatCurrency = (amount: number) => {
             <h1 class="text-3xl font-extrabold text-gray-900">ダッシュボード</h1>
             <p class="text-gray-500 mt-1">家計簿の履歴と管理</p>
          </div>
-         <button @click="isModalOpen = true" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            新規作成
-         </button>
+         <div class="flex gap-3">
+           <input type="file" ref="fileInput" accept="application/pdf" class="hidden" @change="handleFileUpload">
+           <button @click="triggerFileInput" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
+             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+             PDF一括登録
+           </button>
+           <button @click="isModalOpen = true" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              新規作成
+           </button>
+         </div>
        </div>
 
        <!-- Summary Cards -->

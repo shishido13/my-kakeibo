@@ -10,7 +10,8 @@ __pycache__/
 dist/
 build/
 .eggs/
-
+backend/spec/
+backend/dist/
 # Virtual environments
 .venv/
 venv/

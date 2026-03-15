@@ -1,21 +1,23 @@
-from fastapi import APIRouter, UploadFile, File, Form
-from typing import Dict, Any
+from fastapi import APIRouter, UploadFile, File, Depends
+from sqlmodel import Session
+from typing import List, Dict, Any
 
 from app.services import ai_service
+from app.db.session import get_db
+from app.schemas.transaction import TransactionCreate
 
 router = APIRouter()
 
-@router.post("/analyze")
+@router.post("/analyze", response_model=List[TransactionCreate])
 async def analyze_receipt(
     file: UploadFile = File(...),
+    db: Session = Depends(get_db)
 ):
     """
-    アップロードされたレシート画像をAIに解析させ、結果を返すエンドポイント
+    アップロードされたPDFレシートをGemini AIで解析し、
+    トランザクション（候補）のリストを返す。
     """
-    
-    # 将来的には file.file.read() などで画像データを取得し、AIサービスへ渡す
     content = await file.read()
     
-    # ダミーの処理結果を返す（現在はモック）
-    result = await ai_service.analyze_receipt_mock(content, file.filename)
-    return result
+    transactions = await ai_service.analyze_pdf_receipt(content, file.filename, db)
+    return transactions

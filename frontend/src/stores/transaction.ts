@@ -1,13 +1,16 @@
 import { defineStore } from 'pinia'
 import api from '../services/api'
 
+interface Category { id: number; name: string; }
+interface Payer { id: number; name: string; }
+
 export const useTransactionStore = defineStore('transactions', {
   state: () => ({
-    transactions: [],
-    categories: [],
-    payers: [],
+    transactions: [] as any[],
+    categories: [] as Category[],
+    payers: [] as Payer[],
     isLoading: false,
-    error: null
+    error: null as any
   }),
   actions: {
     async fetchTransactions() {
