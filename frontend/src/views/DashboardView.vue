@@ -6,12 +6,43 @@ import { useRouter } from 'vue-router';
 import TransactionList from '../components/TransactionList.vue';
 import TransactionForm from '../components/TransactionForm.vue';
 import Button from 'primevue/button';
+import MultiSelect from 'primevue/multiselect';
 
 const store = useTransactionStore();
 const importStore = useImportStore();
 const router = useRouter();
 const isModalOpen = ref(false);
+const isFilterVisible = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
+
+const filters = ref({
+    start_date: '',
+    end_date: '',
+    category_ids: [] as number[],
+    payer: '',
+    keyword: ''
+});
+
+const handleSearch = () => {
+    const activeFilters = Object.fromEntries(
+        Object.entries(filters.value).filter(([key, value]) => {
+            if (Array.isArray(value)) return value.length > 0;
+            return value !== '' && value !== null;
+        })
+    );
+    store.fetchTransactions(activeFilters);
+};
+
+const handleReset = () => {
+    filters.value = {
+        start_date: '',
+        end_date: '',
+        category_ids: [],
+        payer: '',
+        keyword: ''
+    };
+    store.fetchTransactions();
+};
 
 const triggerFileInput = () => {
     fileInput.value?.click();
@@ -54,55 +85,149 @@ const formatCurrency = (amount: number) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4 w-full">
-    <div class="max-w-5xl w-full">
+  <div class="h-screen bg-gray-50 flex flex-col py-6 px-4 sm:px-8 w-full overflow-hidden">
+    <div class="max-w-[1440px] w-full mx-auto flex flex-col h-full bg-transparent">
         
        <!-- Header Section -->
-       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-         <div>
-            <h1 class="text-3xl font-extrabold text-gray-900">ダッシュボード</h1>
-            <p class="text-gray-500 mt-1">家計簿の履歴と管理</p>
-         </div>
-         <div class="flex gap-3">
-           <input type="file" ref="fileInput" accept="application/pdf" class="hidden" @change="handleFileUpload">
-           <Button
-             label="PDF一括登録"
-             icon="pi pi-upload"
-             @click="triggerFileInput"
-             :pt="{
-               root: { class: 'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center gap-2 cursor-pointer' },
-               label: { class: 'font-semibold' },
-               icon: { class: 'text-base' },
-             }"
-           />
-           <Button
-             label="新規作成"
-             icon="pi pi-plus"
-             @click="isModalOpen = true"
-             :pt="{
-               root: { class: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2 cursor-pointer' },
-               label: { class: 'font-semibold' },
-               icon: { class: 'text-base' },
-             }"
-           />
-         </div>
+       <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-gray-200 pb-6">
+          <div class="flex-1">
+             <div class="flex items-center gap-4">
+                <h1 class="text-2xl font-bold text-gray-900">ダッシュボード</h1>
+                <!-- Compact Stats Bar Integrated in Header -->
+                <div class="hidden lg:flex items-center gap-6 ml-4 py-1 px-4 bg-gray-50 rounded-full border border-gray-200">
+                   <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">支出</span>
+                      <span class="text-sm font-bold text-blue-600">{{ formatCurrency(totalAmount) }}</span>
+                   </div>
+                   <div class="w-px h-3 bg-gray-300"></div>
+                   <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">件数</span>
+                      <span class="text-sm font-bold text-green-600">{{ store.transactions.length }}<span class="text-[10px] font-medium ml-0.5">件</span></span>
+                   </div>
+                </div>
+             </div>
+             <p class="text-xs text-gray-400 mt-0.5">家計簿の履歴と管理</p>
+          </div>
+          
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <Button
+              :icon="isFilterVisible ? 'pi pi-filter-slash' : 'pi pi-filter'"
+              @click="isFilterVisible = !isFilterVisible"
+              :pt="{
+                root: { class: [
+                  'p-2 rounded-lg border transition-all duration-200 cursor-pointer',
+                  isFilterVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                ] }
+              }"
+            />
+            <div class="h-8 w-px bg-gray-200 mx-1 hidden md:block"></div>
+            <input type="file" ref="fileInput" accept="application/pdf" class="hidden" @change="handleFileUpload">
+            <Button
+              label="PDF登録"
+              icon="pi pi-upload"
+              @click="triggerFileInput"
+              :pt="{
+                root: { class: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 cursor-pointer border border-indigo-100' },
+                label: { class: 'text-sm' },
+                icon: { class: 'text-sm' },
+              }"
+            />
+            <Button
+              label="新規作成"
+              icon="pi pi-plus"
+              @click="isModalOpen = true"
+              :pt="{
+                root: { class: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow-sm transition duration-200 flex items-center gap-2 cursor-pointer' },
+                label: { class: 'text-sm' },
+                icon: { class: 'text-sm' },
+              }"
+            />
+          </div>
        </div>
 
-       <!-- Summary Cards -->
-       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-500">
-             <h3 class="text-sm font-medium text-gray-500 uppercase">総合計支出</h3>
-             <p class="mt-2 text-3xl font-bold text-gray-900">{{ formatCurrency(totalAmount) }}</p>
+       <!-- Mobile/Small Screen Stats Bar -->
+       <div class="lg:hidden flex items-center justify-around bg-white border border-gray-200 rounded-lg py-2 px-4 shadow-sm mb-6">
+          <div class="flex flex-col items-center">
+             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">総合計支出</span>
+             <span class="text-base font-bold text-blue-600">{{ formatCurrency(totalAmount) }}</span>
           </div>
-          <div class="bg-white rounded-xl shadow p-6 border-l-4 border-green-500">
-             <h3 class="text-sm font-medium text-gray-500 uppercase">登録件数</h3>
-             <p class="mt-2 text-3xl font-bold text-gray-900">{{ store.transactions.length }} <span class="text-base font-normal text-gray-500">件</span></p>
-          </div>
-          <div class="bg-white rounded-xl shadow p-6 border-l-4 border-purple-500">
-             <h3 class="text-sm font-medium text-gray-500 uppercase">カテゴリ数</h3>
-             <p class="mt-2 text-3xl font-bold text-gray-900">{{ store.categories.length }} <span class="text-base font-normal text-gray-500">種類</span></p>
+          <div class="w-px h-6 bg-gray-100"></div>
+          <div class="flex flex-col items-center">
+             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">登録件数</span>
+             <span class="text-base font-bold text-green-600">{{ store.transactions.length }}<span class="text-[10px] ml-0.5">件</span></span>
           </div>
        </div>
+
+       <!-- Filter Section (Collapsible & Compact) -->
+       <Transition
+         enter-active-class="transition duration-200 ease-out"
+         enter-from-class="transform -translate-y-2 opacity-0"
+         enter-to-class="transform translate-y-0 opacity-100"
+         leave-active-class="transition duration-150 ease-in"
+         leave-from-class="transform translate-y-0 opacity-100"
+         leave-to-class="transform -translate-y-2 opacity-0"
+       >
+         <div v-if="isFilterVisible" class="bg-white rounded-xl border border-blue-100 shadow-sm p-5 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+               <div class="flex flex-col gap-1">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">開始日</label>
+                  <input type="date" v-model="filters.start_date" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none hover:border-gray-300">
+               </div>
+               <div class="flex flex-col gap-1">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">終了日</label>
+                  <input type="date" v-model="filters.end_date" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none hover:border-gray-300">
+               </div>
+               <div class="flex flex-col gap-1">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">カテゴリ</label>
+                  <MultiSelect 
+                    v-model="filters.category_ids" 
+                    :options="store.categories" 
+                    optionLabel="name" 
+                    optionValue="id" 
+                    placeholder="カテゴリ選択" 
+                    :maxSelectedLabels="3"
+                    class="w-full text-sm"
+                    :pt="{
+                        root: { class: 'border border-gray-200 rounded px-2 py-0.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none h-[34px] bg-white hover:border-gray-300 flex items-center' },
+                        labelContainer: { class: 'flex-1 overflow-hidden' },
+                        label: { class: 'text-xs truncate' },
+                        trigger: { class: 'w-4' },
+                        token: { class: 'bg-blue-50 text-blue-600 text-[10px] py-0.5 px-1.5 rounded border border-blue-100' }
+                    }"
+                  />
+               </div>
+               <div class="flex flex-col gap-1">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">支払者</label>
+                  <select v-model="filters.payer" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none h-[34px] bg-white hover:border-gray-300">
+                     <option value="">すべて</option>
+                     <option v-for="p in store.payers" :key="p.id" :value="p.name">{{ p.name }}</option>
+                  </select>
+               </div>
+               <div class="flex flex-col gap-1">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">キーワード</label>
+                  <input type="text" v-model="filters.keyword" placeholder="店舗名・内容" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none hover:border-gray-300">
+               </div>
+            </div>
+            <div class="flex justify-end mt-4 gap-2">
+               <button 
+                  class="text-xs font-semibold text-gray-500 hover:text-gray-700 px-3 py-1.5 transition-colors"
+                  @click="handleReset"
+               >
+                  <i class="pi pi-refresh text-[10px] mr-1"></i> リセット
+               </button>
+               <Button 
+                  label="この条件で検索" 
+                  icon="pi pi-search" 
+                  @click="handleSearch"
+                  size="small"
+                  :pt="{
+                     root: { class: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-4 rounded shadow-sm text-xs cursor-pointer' },
+                     icon: { class: 'mr-1 text-[10px]' }
+                  }"
+               />
+            </div>
+         </div>
+       </Transition>
 
        <!-- Error state if failed to load -->
        <div v-if="store.error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-8 rounded-r text-red-700">
@@ -118,15 +243,20 @@ const formatCurrency = (amount: number) => {
             </svg>
        </div>
 
-       <!-- Main List Section -->
-       <div v-else>
-         <h2 class="text-xl font-bold text-gray-800 mb-4">取引履歴</h2>
-         <TransactionList 
-           :transactions="store.transactions" 
-           :categories="store.categories"
-           @delete="store.deleteTransaction"
-         />
-       </div>
+        <!-- Main List Section (With Height Management) -->
+        <div class="flex-1 flex flex-col min-h-0 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+             <h2 class="text-sm font-bold text-gray-700">取引履歴</h2>
+             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">最新順</span>
+          </div>
+          <div class="flex-1 overflow-hidden relative">
+             <TransactionList 
+               :transactions="store.transactions" 
+               :categories="store.categories"
+               @delete="store.deleteTransaction"
+             />
+          </div>
+        </div>
 
     </div>
 

@@ -1,4 +1,3 @@
-import PrimeUI from 'tailwindcss-primeui';
 export default {
   content: [
     "./index.html",
@@ -9,6 +8,6 @@ export default {
   theme: {
     extend: {
     },
-    plugins: [PrimeUI], // エラーが出るプラグインは一旦空にする
+    plugins: [], 
   }
 }

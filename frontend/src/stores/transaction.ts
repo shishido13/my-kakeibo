@@ -13,10 +13,15 @@ export const useTransactionStore = defineStore('transactions', {
     error: null as any
   }),
   actions: {
-    async fetchTransactions() {
+    async fetchTransactions(filters: any = {}) {
       this.isLoading = true
       try {
-        const response = await api.get('/transactions/')
+        const response = await api.get('/transactions/', { 
+          params: filters,
+          paramsSerializer: {
+            indexes: null // Serialize arrays as category_ids=1&category_ids=2
+          }
+        })
         this.transactions = response.data
       } catch (error) {
         this.error = error
@@ -40,7 +45,7 @@ export const useTransactionStore = defineStore('transactions', {
         console.error(error)
       }
     },
-    async addTransaction(transactionData) {
+    async addTransaction(transactionData: any) {
       try {
         const response = await api.post('/transactions/', transactionData)
         this.transactions.unshift(response.data) // Add new item to front of list
@@ -50,7 +55,7 @@ export const useTransactionStore = defineStore('transactions', {
         return false
       }
     },
-    async deleteTransaction(id) {
+    async deleteTransaction(id: number) {
        try {
         await api.delete(`/transactions/${id}`)
          // Remove from local state

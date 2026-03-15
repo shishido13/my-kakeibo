@@ -13,7 +13,8 @@ def get_transactions(
     limit: int = 100,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
-    category_id: Optional[int] = None,
+    category_ids: Optional[List[int]] = None,
+    payer: Optional[str] = None,
     keyword: Optional[str] = None
 ) -> List[Transaction]:
     query = select(Transaction)
@@ -22,8 +23,10 @@ def get_transactions(
         query = query.where(Transaction.date >= start_date)
     if end_date:
         query = query.where(Transaction.date <= end_date)
-    if category_id:
-        query = query.where(Transaction.category_id == category_id)
+    if category_ids:
+        query = query.where(Transaction.category_id.in_(category_ids))
+    if payer:
+        query = query.where(Transaction.payer == payer)
     if keyword:
         # Simple simple search in shop, content, description
         query = query.where(

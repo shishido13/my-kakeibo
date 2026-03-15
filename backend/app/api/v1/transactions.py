@@ -14,14 +14,15 @@ def read_transactions(
     limit: int = 100,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
-    category_id: Optional[int] = None,
+    category_ids: List[int] = Query(None),
+    payer: Optional[str] = None,
     keyword: Optional[str] = None,
     session: Session = Depends(get_session)
 ):
     return crud_transaction.get_transactions(
         session, skip=skip, limit=limit, 
         start_date=start_date, end_date=end_date, 
-        category_id=category_id, keyword=keyword
+        category_ids=category_ids, payer=payer, keyword=keyword
     )
 
 @router.get("/{transaction_id}", response_model=TransactionRead)

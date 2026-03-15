@@ -39,16 +39,19 @@ const formatCurrency = (amount: number) => {
 </script>
 
 <template>
-  <div class="bg-white shadow rounded-lg overflow-hidden">
+  <div class="h-full w-full">
     <DataTable
       :value="transactions"
       stripedRows
+      scrollable
+      scrollHeight="flex"
+      size="small"
       :pt="{
-        root: { class: 'w-full' },
-        table: { class: 'min-w-full divide-y divide-gray-200 text-left' },
-        thead: { class: 'bg-gray-50' },
-        tbody: { class: 'bg-white divide-y divide-gray-200' },
-        row: { class: 'hover:bg-gray-50 transition-colors' },
+        root: { class: 'w-full h-full flex flex-col' },
+        table: { class: 'min-w-full divide-y divide-gray-200 text-left border-collapse' },
+        thead: { class: 'sticky top-0 z-10 bg-gray-50' },
+        tbody: { class: 'bg-white divide-y divide-gray-200 flex-1' },
+        row: { class: 'hover:bg-blue-50/30 transition-colors group' },
         emptyMessage: { class: 'text-center' },
       }"
     >
@@ -56,22 +59,22 @@ const formatCurrency = (amount: number) => {
         field="date"
         header="日付"
         :pt="{
-          headerCell: { class: 'px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider' },
-          bodyCell: { class: 'px-6 py-2 whitespace-nowrap text-sm text-gray-900' },
+          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
+          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-600 font-medium' },
         }"
       />
       <Column
         header="カテゴリ"
         :pt="{
-          headerCell: { class: 'px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider' },
-          bodyCell: { class: 'px-6 py-2 whitespace-nowrap text-sm text-gray-500' },
+          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
+          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-500' },
         }"
       >
         <template #body="{ data }">
           <Tag
             :value="getCategoryName(data.category_id)"
             :pt="{
-              root: { class: 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800' },
+              root: { class: 'px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-blue-50 text-blue-600 border border-blue-100' },
             }"
           />
         </template>
@@ -79,20 +82,20 @@ const formatCurrency = (amount: number) => {
       <Column
         header="店舗 / 内容"
         :pt="{
-          headerCell: { class: 'px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider' },
-          bodyCell: { class: 'px-6 py-2 whitespace-nowrap text-sm text-gray-900' },
+          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
+          bodyCell: { class: 'px-4 py-2.5 text-xs text-gray-900 max-w-[300px]' },
         }"
       >
         <template #body="{ data }">
-          <div class="font-medium">{{ data.shop }}</div>
-          <div class="text-xs text-gray-500">{{ data.content }}</div>
+          <div class="font-bold text-gray-800 truncate">{{ data.shop }}</div>
+          <div class="text-[10px] text-gray-400 truncate mt-0.5">{{ data.content }}</div>
         </template>
       </Column>
       <Column
         header="金額"
         :pt="{
-          headerCell: { class: 'px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right' },
-          bodyCell: { class: 'px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900 text-right' },
+          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200 text-right' },
+          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-sm font-black text-gray-900 text-right font-mono' },
         }"
       >
         <template #body="{ data }">{{ formatCurrency(data.amount) }}</template>
@@ -101,15 +104,15 @@ const formatCurrency = (amount: number) => {
         field="payer"
         header="支払者"
         :pt="{
-          headerCell: { class: 'px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider' },
-          bodyCell: { class: 'px-6 py-2 whitespace-nowrap text-sm text-gray-500' },
+          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
+          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-500 font-medium' },
         }"
       />
       <Column
         header=""
         :pt="{
-          headerCell: { class: 'relative px-6 py-3' },
-          bodyCell: { class: 'px-6 py-2 whitespace-nowrap text-right text-sm font-medium' },
+          headerCell: { class: 'px-4 py-3 bg-gray-50 border-b border-gray-200 w-12' },
+          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-right text-xs' },
         }"
       >
         <template #body="{ data }">
@@ -117,16 +120,21 @@ const formatCurrency = (amount: number) => {
             icon="pi pi-trash"
             aria-label="削除"
             @click="emit('delete', data.id)"
+            plain
+            text
             :pt="{
-              root: { class: 'text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors cursor-pointer' },
-              icon: { class: 'text-base' },
+              root: { class: 'text-gray-300 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-all cursor-pointer' },
+              icon: { class: 'text-xs' },
             }"
           />
         </template>
       </Column>
 
       <template #empty>
-        <td colspan="6" class="px-6 py-10 text-center text-gray-500">データがありません。</td>
+        <div class="flex flex-col items-center justify-center py-20 bg-gray-50/30 rounded-lg mx-4 my-8 border border-dashed border-gray-200">
+           <i class="pi pi-inbox text-3xl text-gray-300 mb-3"></i>
+           <span class="text-sm font-medium text-gray-400 uppercase tracking-widest">データがありません</span>
+        </div>
       </template>
     </DataTable>
   </div>
