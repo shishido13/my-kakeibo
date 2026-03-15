@@ -5,6 +5,7 @@ import { useImportStore } from '../stores/useImportStore';
 import { useRouter } from 'vue-router';
 import TransactionList from '../components/TransactionList.vue';
 import TransactionForm from '../components/TransactionForm.vue';
+import Button from 'primevue/button';
 
 const store = useTransactionStore();
 const importStore = useImportStore();
@@ -64,14 +65,26 @@ const formatCurrency = (amount: number) => {
          </div>
          <div class="flex gap-3">
            <input type="file" ref="fileInput" accept="application/pdf" class="hidden" @change="handleFileUpload">
-           <button @click="triggerFileInput" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
-             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-             PDF一括登録
-           </button>
-           <button @click="isModalOpen = true" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              新規作成
-           </button>
+           <Button
+             label="PDF一括登録"
+             icon="pi pi-upload"
+             @click="triggerFileInput"
+             :pt="{
+               root: { class: 'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center gap-2 cursor-pointer' },
+               label: { class: 'font-semibold' },
+               icon: { class: 'text-base' },
+             }"
+           />
+           <Button
+             label="新規作成"
+             icon="pi pi-plus"
+             @click="isModalOpen = true"
+             :pt="{
+               root: { class: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 flex items-center gap-2 cursor-pointer' },
+               label: { class: 'font-semibold' },
+               icon: { class: 'text-base' },
+             }"
+           />
          </div>
        </div>
 
