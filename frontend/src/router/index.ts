@@ -14,7 +14,13 @@ const router = createRouter({
       path: '/import',
       name: 'importVerify',
       component: ImportVerifyView
+    },
+    {
+      path: '/analytics',
+      name: 'analytics',
+      component: () => import('../views/AnalyticsView.vue')
     }
+
   ]
 })
 

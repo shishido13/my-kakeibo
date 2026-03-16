@@ -111,15 +111,27 @@ const formatCurrency = (amount: number) => {
           
           <div class="flex items-center gap-2 w-full md:w-auto">
             <Button
+              icon="pi pi-chart-bar"
+              @click="router.push('/analytics')"
+              label="レポート"
+              :pt="{
+                root: { class: 'bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-200 transition duration-200 flex items-center gap-2 cursor-pointer shadow-sm' },
+                label: { class: 'text-sm' },
+                icon: { class: 'text-sm text-blue-500' }
+              }"
+            />
+            <div class="h-8 w-px bg-gray-200 mx-1 hidden md:block"></div>
+            <Button
               :icon="isFilterVisible ? 'pi pi-filter-slash' : 'pi pi-filter'"
               @click="isFilterVisible = !isFilterVisible"
               :pt="{
                 root: { class: [
                   'p-2 rounded-lg border transition-all duration-200 cursor-pointer',
-                  isFilterVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                  isFilterVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 shadow-sm'
                 ] }
               }"
             />
+
             <div class="h-8 w-px bg-gray-200 mx-1 hidden md:block"></div>
             <input type="file" ref="fileInput" accept="application/pdf" class="hidden" @change="handleFileUpload">
             <Button

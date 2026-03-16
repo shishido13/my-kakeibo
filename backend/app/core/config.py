@@ -1,10 +1,32 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "My Kakeibo API"
-    DATABASE_URL: str = "sqlite:///./db_data/kakeibo.db" # Default for local/docker
+    
+    # Turso用 (Vercel環境では環境変数から読み込む)
+    DATABASE_URL: str
+    TURSO_TOKEN: str | None = None  # Turso接続用のトークン
+    
+    @field_validator("DATABASE_URL", "TURSO_TOKEN", mode="before")
+    @classmethod
+    def strip_whitespace(cls, v):
+        if isinstance(v, str):
+            return v.strip().strip('"').strip("'")
+        return v
+
+    # AIアシスタント用
     GEMINI_API_KEY: str | None = None
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    # Auth.jsとの連携用（必要に応じて）
+    ALLOWED_EMAILS: str | None = None
+
+    model_config = SettingsConfigDict(
+        env_file=".env", 
+        env_file_encoding="utf-8",
+        extra="ignore" # 環境変数に余計な値があってもエラーにしない
+    )
 
 settings = Settings()
