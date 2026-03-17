@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api.v1.api import api_router
+from app.api.v1.api import api_router as api
+from app.api.v1.auth import router as auth
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
@@ -23,7 +24,8 @@ app.add_middleware(
 )
 
 # 2. ルーターの登録
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api, prefix="/api/v1")
+app.include_router(auth, prefix="/api/v1/auth")
 
 @app.on_event("startup")
 def on_startup():

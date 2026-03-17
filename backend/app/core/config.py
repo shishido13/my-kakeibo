@@ -17,10 +17,9 @@ class Settings(BaseSettings):
             return v.strip().strip('"').strip("'")
         return v
 
-    # AIアシスタント用
-    GEMINI_API_KEY: str | None = None
-
-    # Auth.jsとの連携用（必要に応じて）
+    # Auth.js / Google OAuth
+    GOOGLE_CLIENT_ID: str | None = None
+    GOOGLE_CLIENT_SECRET: str | None = None
     ALLOWED_EMAILS: str | None = None
 
     model_config = SettingsConfigDict(

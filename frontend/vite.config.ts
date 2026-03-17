@@ -8,6 +8,11 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  define: {
+    'process.env': {},
+    '__dirname': JSON.stringify(''),
+    '__filename': JSON.stringify(''),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
