@@ -3,37 +3,62 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1.api import api_router as api
 from app.api.v1.auth import router as auth
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+import os
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-# 1. CORS設定（フロントエンドからの通信を許可）
+# 1. CORS設定
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "https://my-kakeibo-frontend.vercel.app",
-        "https://my-kakeibo-frontend-git-main-shishidos-projects-49902237.vercel.app",
-        "https://my-kakeibo-frontend-git-pdf-import-shishidos-projects-49902237.vercel.app"
-    ],
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # 2. ルーターの登録
+# ここで prefix="/api" と定義しているため、
+# 実際のURLは /api/... や /api/auth/... になります
 app.include_router(api, prefix="/api/v1")
-app.include_router(auth, prefix="/api/v1/auth")
+app.include_router(auth, prefix="/api/auth")
 
 @app.on_event("startup")
 def on_startup():
-    # クラウド(Turso)使用時は、ここで SQLModel.metadata.create_all(engine) を
-    # 実行してはいけません（偽Engineのためエラーになります）。
-    # テーブル作成は turso shell 等で事前に行っておく運用にします。
     print(f"🚀 {settings.PROJECT_NAME} backend started successfully!")
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to My Kakeibo API! Cloud bypass mode active."}
+# 3. 静的ファイル（フロントエンド）の配信設定
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+
+if os.path.exists(static_dir):
+    # assets (JS/CSS) の配信
+    app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="static")
+
+    # 全てのリクエストを SPA として index.html に誘導する
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # 真の API エンドポイント（backend で処理すべきもの）はスキップして
+        # FastAPI のルーターに任せる。
+        # ただし、/api/auth/callback/google などのフロントエンドが処理すべきパスは
+        # ここで index.html を返すようにする。
+        is_api_endpoint = full_path.startswith("api/v1") or full_path == "api/auth/google"
+        
+        if is_api_endpoint:
+            return None 
+        # 物理的なファイル（favicon.icoなど）があればそれを返す
+        file_path = os.path.join(static_dir, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        # それ以外（Vueの画面遷移など）はすべて index.html を返す
+        return FileResponse(os.path.join(static_dir, "index.html"))
+
+    # ルートへのアクセスも index.html
+    @app.get("/")
+    async def serve_index():
+        return FileResponse(os.path.join(static_dir, "index.html"))
+else:
+    @app.get("/")
+    def read_root():
+        return {"message": "Welcome to My Kakeibo API! Static files not found."}

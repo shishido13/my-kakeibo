@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     # Auth.js / Google OAuth
     GOOGLE_CLIENT_ID: str | None = None
     GOOGLE_CLIENT_SECRET: str | None = None
+    GEMINI_API_KEY: str | None = None
+    REDIRECT_URI: str | None = None
     ALLOWED_EMAILS: str | None = None
 
     model_config = SettingsConfigDict(

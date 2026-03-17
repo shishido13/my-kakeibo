@@ -15,7 +15,7 @@ onMounted(async () => {
   if (code) {
     try {
       // 1. バックエンドにコードを送って、ユーザー情報を取得・認証する
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/google`, { code })
+      const response = await axios.post(`/api/auth/google`, { code })
       
       // 2. ログイン成功フラグを保存（本来はJWTトークンなどを入れる）
       localStorage.setItem('isLoggedIn', 'true')
