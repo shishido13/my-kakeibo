@@ -176,10 +176,14 @@ const textareaPt = {
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">支払者</label>
-        <InputText
+        <Select
           v-model="formData.payer"
+          :options="store.payers"
+          optionLabel="name"
+          optionValue="name"
+          placeholder="選択してください"
           required
-          :pt="inputPt"
+          :pt="selectPt"
         />
       </div>
 
