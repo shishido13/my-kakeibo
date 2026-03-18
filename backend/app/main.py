@@ -19,8 +19,6 @@ app.add_middleware(
 )
 
 # 2. ルーターの登録
-# ここで prefix="/api" と定義しているため、
-# 実際のURLは /api/... や /api/auth/... になります
 app.include_router(api, prefix="/api/v1")
 app.include_router(auth, prefix="/api/auth")
 
@@ -38,23 +36,16 @@ if os.path.exists(static_dir):
     # 全てのリクエストを SPA として index.html に誘導する
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
-        # 真の API エンドポイント（backend で処理すべきもの）はスキップして
-        # FastAPI のルーターに任せる。
-        # ただし、/api/auth/callback/google などのフロントエンドが処理すべきパスは
-        # ここで index.html を返すようにする。
         is_api_endpoint = full_path.startswith("api/v1") or full_path == "api/auth/google"
         
         if is_api_endpoint:
             return None 
-        # 物理的なファイル（favicon.icoなど）があればそれを返す
         file_path = os.path.join(static_dir, full_path)
         if os.path.isfile(file_path):
             return FileResponse(file_path)
         
-        # それ以外（Vueの画面遷移など）はすべて index.html を返す
         return FileResponse(os.path.join(static_dir, "index.html"))
 
-    # ルートへのアクセスも index.html
     @app.get("/")
     async def serve_index():
         return FileResponse(os.path.join(static_dir, "index.html"))
