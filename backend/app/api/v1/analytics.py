@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import Session
 from typing import List, Optional
 from datetime import date, timedelta
 from app.db.session import get_session
 from app import crud
 from app.schemas.analytics import AnalyticsSummary, AnalyticsTrend
+from app.db.session import DatabaseSession
 
 router = APIRouter()
 
 @router.get("/summary", response_model=AnalyticsSummary)
 def read_analytics_summary(
     *,
-    session: Session = Depends(get_session),
+    session: DatabaseSession = Depends(get_session),
     start_date: date,
     end_date: date,
     compare: bool = False
@@ -41,7 +41,7 @@ def read_analytics_summary(
 @router.get("/trend", response_model=List[AnalyticsTrend])
 def read_analytics_trend(
     *,
-    session: Session = Depends(get_session),
+    session: DatabaseSession = Depends(get_session),
     start_date: date,
     end_date: date,
     group_by: str = Query("month", regex="^(day|week|month)$")

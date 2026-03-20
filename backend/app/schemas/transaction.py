@@ -1,9 +1,9 @@
-from datetime import date, datetime
+from datetime import date as DateType, datetime as DateTimeType
 from typing import Optional, Literal
 from pydantic import BaseModel
 
 class TransactionCreate(BaseModel):
-    date: date
+    date: DateType
     amount: int
     category_id: int
     shop: str
@@ -13,7 +13,7 @@ class TransactionCreate(BaseModel):
     source_type: Optional[Literal["manual", "ai_pdf", "csv_import"]] = "manual"
 
 class TransactionUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[DateType] = None
     amount: Optional[int] = None
     category_id: Optional[int] = None
     shop: Optional[str] = None
@@ -24,7 +24,7 @@ class TransactionUpdate(BaseModel):
 
 class TransactionRead(BaseModel):
     id: int
-    date: date
+    date: DateType
     amount: int
     category_id: int
     shop: str
@@ -32,4 +32,4 @@ class TransactionRead(BaseModel):
     payer: str
     description: Optional[str] = None
     source_type: str
-    created_at: datetime
+    created_at: DateTimeType

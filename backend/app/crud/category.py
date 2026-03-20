@@ -1,37 +1,54 @@
 from typing import List, Optional
-from sqlmodel import Session, select
+
+from app.db.session import DatabaseSession
 from app.models.category import Category
 from app.schemas.category import CategoryCreate, CategoryUpdate
 
-def get_category(session: Session, category_id: int) -> Optional[Category]:
-    return session.get(Category, category_id)
 
-def get_categories(session: Session, skip: int = 0, limit: int = 100, active_only: bool = True) -> List[Category]:
-    query = select(Category)
-    if active_only:
-        query = query.where(Category.is_active == True)
-    query = query.offset(skip).limit(limit)
-    return session.exec(query).all()
+def _row_to_category(row: dict | None) -> Optional[Category]:
+    return Category.model_validate(row) if row else None
 
-def create_category(session: Session, category_in: CategoryCreate) -> Category:
-    db_category = Category.model_validate(category_in)
-    session.add(db_category)
-    session.commit()
-    session.refresh(db_category)
-    return db_category
 
-def update_category(session: Session, db_category: Category, category_in: CategoryUpdate) -> Category:
-    category_data = category_in.model_dump(exclude_unset=True)
-    for key, value in category_data.items():
-        setattr(db_category, key, value)
-    session.add(db_category)
-    session.commit()
-    session.refresh(db_category)
-    return db_category
+def get_category(session: DatabaseSession, category_id: int) -> Optional[Category]:
+    row = session.fetch_one(
+        f"SELECT id, name, is_active FROM m_category WHERE id = {category_id}"
+    )
+    return _row_to_category(row)
 
-def deactivate_category(session: Session, db_category: Category) -> Category:
-    db_category.is_active = False
-    session.add(db_category)
-    session.commit()
-    session.refresh(db_category)
-    return db_category
+
+def get_categories(session: DatabaseSession, skip: int = 0, limit: int = 100, active_only: bool = True) -> List[Category]:
+    where_clause = 'WHERE is_active = 1' if active_only else ''
+    rows = session.fetch_all(
+        f"SELECT id, name, is_active FROM m_category {where_clause} ORDER BY id LIMIT {limit} OFFSET {skip}"
+    )
+    return [Category.model_validate(row) for row in rows]
+
+
+def create_category(session: DatabaseSession, category_in: CategoryCreate) -> Category:
+    category_id = session.insert(
+        'm_category',
+        {
+            'name': category_in.name,
+            'is_active': True,
+        },
+    )
+    return get_category(session, int(category_id))
+
+
+def update_category(session: DatabaseSession, category_id: int, category_in: CategoryUpdate) -> Optional[Category]:
+    existing = get_category(session, category_id)
+    if not existing:
+        return None
+
+    updates = category_in.model_dump(exclude_unset=True)
+    session.update('m_category', category_id, updates)
+    return get_category(session, category_id)
+
+
+def deactivate_category(session: DatabaseSession, category_id: int) -> Optional[Category]:
+    existing = get_category(session, category_id)
+    if not existing:
+        return None
+
+    session.update('m_category', category_id, {'is_active': False})
+    return get_category(session, category_id)

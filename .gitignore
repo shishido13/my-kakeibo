@@ -25,6 +25,7 @@ backend/db_data/*.db
 .env
 .env.local
 .env.*.local
+.env.*.production
 backend/.env
 
 # ==============================
@@ -35,7 +36,8 @@ frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 *.local
-
+*.env
+frontend/.env
 # Logs
 logs/
 *.log
@@ -71,3 +73,5 @@ Desktop.ini
 test_results.txt
 test_upload.py
 test_all_endpoints.py
+
+Dockerfile

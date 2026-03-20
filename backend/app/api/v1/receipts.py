@@ -1,17 +1,17 @@
 from fastapi import APIRouter, UploadFile, File, Depends
-from sqlmodel import Session
 from typing import List, Dict, Any
 
 from app.services import ai_service
 from app.db.session import get_db
 from app.schemas.transaction import TransactionCreate
+from app.db.session import DatabaseSession
 
 router = APIRouter()
 
 @router.post("/analyze", response_model=List[TransactionCreate])
 async def analyze_receipt(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: DatabaseSession = Depends(get_db)
 ):
     """
     アップロードされたPDFレシートをGemini AIで解析し、

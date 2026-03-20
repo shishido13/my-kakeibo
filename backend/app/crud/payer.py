@@ -1,37 +1,54 @@
 from typing import List, Optional
-from sqlmodel import Session, select
+
+from app.db.session import DatabaseSession
 from app.models.payer import Payer
 from app.schemas.payer import PayerCreate, PayerUpdate
 
-def get_payer(session: Session, payer_id: int) -> Optional[Payer]:
-    return session.get(Payer, payer_id)
 
-def get_payers(session: Session, skip: int = 0, limit: int = 100, active_only: bool = True) -> List[Payer]:
-    query = select(Payer)
-    if active_only:
-        query = query.where(Payer.is_active == True)
-    query = query.offset(skip).limit(limit)
-    return session.exec(query).all()
+def _row_to_payer(row: dict | None) -> Optional[Payer]:
+    return Payer.model_validate(row) if row else None
 
-def create_payer(session: Session, payer_in: PayerCreate) -> Payer:
-    db_payer = Payer.model_validate(payer_in)
-    session.add(db_payer)
-    session.commit()
-    session.refresh(db_payer)
-    return db_payer
 
-def update_payer(session: Session, db_payer: Payer, payer_in: PayerUpdate) -> Payer:
-    payer_data = payer_in.model_dump(exclude_unset=True)
-    for key, value in payer_data.items():
-        setattr(db_payer, key, value)
-    session.add(db_payer)
-    session.commit()
-    session.refresh(db_payer)
-    return db_payer
+def get_payer(session: DatabaseSession, payer_id: int) -> Optional[Payer]:
+    row = session.fetch_one(
+        f"SELECT id, name, is_active FROM m_payer WHERE id = {payer_id}"
+    )
+    return _row_to_payer(row)
 
-def deactivate_payer(session: Session, db_payer: Payer) -> Payer:
-    db_payer.is_active = False
-    session.add(db_payer)
-    session.commit()
-    session.refresh(db_payer)
-    return db_payer
+
+def get_payers(session: DatabaseSession, skip: int = 0, limit: int = 100, active_only: bool = True) -> List[Payer]:
+    where_clause = 'WHERE is_active = 1' if active_only else ''
+    rows = session.fetch_all(
+        f"SELECT id, name, is_active FROM m_payer {where_clause} ORDER BY id LIMIT {limit} OFFSET {skip}"
+    )
+    return [Payer.model_validate(row) for row in rows]
+
+
+def create_payer(session: DatabaseSession, payer_in: PayerCreate) -> Payer:
+    payer_id = session.insert(
+        'm_payer',
+        {
+            'name': payer_in.name,
+            'is_active': True,
+        },
+    )
+    return get_payer(session, int(payer_id))
+
+
+def update_payer(session: DatabaseSession, payer_id: int, payer_in: PayerUpdate) -> Optional[Payer]:
+    existing = get_payer(session, payer_id)
+    if not existing:
+        return None
+
+    updates = payer_in.model_dump(exclude_unset=True)
+    session.update('m_payer', payer_id, updates)
+    return get_payer(session, payer_id)
+
+
+def deactivate_payer(session: DatabaseSession, payer_id: int) -> Optional[Payer]:
+    existing = get_payer(session, payer_id)
+    if not existing:
+        return None
+
+    session.update('m_payer', payer_id, {'is_active': False})
+    return get_payer(session, payer_id)
