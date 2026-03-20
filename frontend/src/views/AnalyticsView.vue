@@ -2,6 +2,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAnalyticsStore } from '../stores/analytics';
+import { useTransactionStore } from '../stores/transaction';
 import Button from 'primevue/button';
 import SelectButton from 'primevue/selectbutton';
 import { Pie, Bar } from 'vue-chartjs';
@@ -32,6 +33,7 @@ ChartJS.register(
 
 const router = useRouter();
 const store = useAnalyticsStore();
+const transactionStore = useTransactionStore();
 
 const periodType = ref('monthly');
 const periodOptions = [
@@ -41,6 +43,9 @@ const periodOptions = [
 ];
 
 const selectedDate = ref(new Date().toISOString().split('T')[0]);
+const selectedPayer = ref('');
+const selectedExpenseTypeId = ref<number | ''>('');
+const selectedCategoryIds = ref<number[]>([]);
 
 const fetchData = async () => {
     let start_date = '';
@@ -67,14 +72,46 @@ const fetchData = async () => {
         end_date = sunday.toISOString().split('T')[0];
     }
 
+    const filterParams = {
+        start_date,
+        end_date,
+        compare: true,
+        ...(selectedPayer.value ? { payer: selectedPayer.value } : {}),
+        ...(selectedExpenseTypeId.value ? { expense_type_id: selectedExpenseTypeId.value } : {}),
+        ...(selectedCategoryIds.value.length > 0 ? { category_ids: selectedCategoryIds.value } : {})
+    };
+
     await Promise.all([
-        store.fetchSummary({ start_date, end_date, compare: true }),
-        store.fetchTrend({ start_date, end_date, group_by: periodType.value === 'yearly' ? 'month' : 'day' })
+        store.fetchSummary(filterParams),
+        store.fetchTrend({
+            ...filterParams,
+            group_by: periodType.value === 'yearly' ? 'month' : 'day'
+        })
     ]);
 };
 
-onMounted(fetchData);
-watch([periodType, selectedDate], fetchData);
+onMounted(async () => {
+    await Promise.all([
+        transactionStore.fetchCategories(),
+        transactionStore.fetchPayers(),
+        transactionStore.fetchExpenseTypes()
+    ]);
+    await fetchData();
+});
+
+watch([periodType, selectedDate, selectedPayer, selectedExpenseTypeId, selectedCategoryIds], fetchData, { deep: true });
+
+const categorySelectionSummary = computed(() => {
+    if (selectedCategoryIds.value.length === 0) {
+        return 'すべて';
+    }
+
+    const names = transactionStore.categories
+        .filter((category) => selectedCategoryIds.value.includes(category.id))
+        .map((category) => category.name);
+
+    return names.join('、');
+});
 
 const pieData = computed(() => {
     if (!store.summary?.categories) return { labels: [], datasets: [] };
@@ -142,7 +179,7 @@ const formatCurrency = (amount: number) => {
         </div>
 
         <!-- Controls -->
-        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap gap-4 items-center">
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap gap-4 items-end">
             <SelectButton 
                 v-model="periodType" 
                 :options="periodOptions" 
@@ -157,6 +194,27 @@ const formatCurrency = (amount: number) => {
             <div class="flex items-center gap-2">
                 <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">基準日:</label>
                 <input type="date" v-model="selectedDate" class="border border-gray-200 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none hover:border-gray-300">
+            </div>
+            <div class="flex flex-col gap-1 min-w-[160px]">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">支払者</label>
+                <select v-model="selectedPayer" class="border border-gray-200 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none h-[36px] bg-white hover:border-gray-300">
+                    <option value="">すべて</option>
+                    <option v-for="payer in transactionStore.payers" :key="payer.id" :value="payer.name">{{ payer.name }}</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1 min-w-[160px]">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">支出タイプ</label>
+                <select v-model="selectedExpenseTypeId" class="border border-gray-200 rounded px-3 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none h-[36px] bg-white hover:border-gray-300">
+                    <option value="">すべて</option>
+                    <option v-for="expenseType in transactionStore.expenseTypes" :key="expenseType.id" :value="expenseType.id">{{ expenseType.name }}</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1 min-w-[220px] flex-1">
+                <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">カテゴリ</label>
+                <select v-model="selectedCategoryIds" multiple class="min-h-[108px] border border-gray-200 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-blue-400 outline-none bg-white hover:border-gray-300">
+                    <option v-for="category in transactionStore.categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+                </select>
+                <p class="text-[11px] text-gray-400">未選択で すべて。複数選択のまま利用できます。現在: {{ categorySelectionSummary }}</p>
             </div>
         </div>
 
