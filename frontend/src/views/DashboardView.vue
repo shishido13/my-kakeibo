@@ -3,8 +3,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useTransactionStore } from '../stores/transaction';
 import { useImportStore } from '../stores/useImportStore';
 import { useRouter } from 'vue-router';
-import TransactionList from '../components/TransactionList.vue';
-import TransactionForm from '../components/TransactionForm.vue';
+import TransactionList from '@/components/TransactionList.vue';
+import TransactionForm from '@/components/TransactionForm.vue';
 import Button from 'primevue/button';
 import MultiSelect from 'primevue/multiselect';
 

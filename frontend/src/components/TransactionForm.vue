@@ -34,7 +34,7 @@ const formData = ref<TransactionForm>({
   category_id: null,
   shop: '',
   content: '',
-  payer: '自分',
+  payer: '俊介',
   description: '',
 });
 
@@ -76,32 +76,35 @@ const closeModal = () => {
   emit('close');
 };
 
-/** Passthrough classes */
 const dialogPt = {
-  root: { class: 'bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden' },
-  header: { class: 'bg-blue-600 px-6 py-4 flex justify-between items-center text-white' },
-  title: { class: 'text-xl font-bold text-white' },
-  closeButton: { class: 'text-white hover:text-gray-200 focus:outline-none rounded-full w-8 h-8 flex items-center justify-center' },
+  root: { class: 'bg-white rounded-lg shadow-xl w-[calc(100vw-1rem)] max-w-[36rem] sm:w-full overflow-hidden' },
+  header: { class: 'bg-blue-600 px-4 py-3 sm:px-5 sm:py-3.5 flex justify-between items-center text-white' },
+  title: { class: 'text-base sm:text-lg font-bold text-white' },
+  closeButton: { class: 'text-white hover:text-gray-200 focus:outline-none rounded-full w-7 h-7 flex items-center justify-center' },
   closeIcon: { class: 'text-white' },
-  content: { class: 'p-6 space-y-4' },
+  content: { class: 'p-3.5 space-y-3 sm:p-4 sm:space-y-3.5' },
 };
+
 const inputPt = {
-  root: { class: 'w-full border-gray-300 border rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm' },
+  root: { class: 'w-full border-gray-300 border shadow-sm px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm' },
 };
+
 const selectPt = {
-  root: { class: 'w-full border-gray-300 border rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm cursor-pointer flex items-center justify-between' },
-  label: { class: 'flex-1 text-sm text-gray-700' },
+  root: { class: 'w-full min-h-[38px] sm:min-h-[40px] border-gray-300 border shadow-sm px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm cursor-pointer flex items-center justify-between' },
+  label: { class: 'flex-1 text-sm text-gray-700 truncate' },
   dropdown: { class: 'ml-2 text-gray-400' },
-  panel: { class: 'bg-white border border-gray-200 rounded-md shadow-lg mt-1 z-50 text-sm' },
+  panel: { class: 'bg-white border border-gray-200 shadow-lg mt-1 z-50 text-sm' },
   list: { class: 'py-1 max-h-60 overflow-auto' },
-  option: { class: 'px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 data-[p-focused=true]:bg-blue-50 data-[p-selected=true]:bg-blue-100 data-[p-selected=true]:text-blue-700' },
+  option: { class: 'px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 data-[p-focused=true]:bg-blue-50 data-[p-selected=true]:bg-blue-100 data-[p-selected=true]:text-blue-700' },
 };
+
 const datePt = {
   root: { class: 'w-full border' },
-  input: { class: 'w-full border border-gray-300 shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm' },
+  input: { class: 'w-full border border-gray-300 shadow-sm px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm' },
 };
+
 const textareaPt = {
-  root: { class: 'w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none' },
+  root: { class: 'w-full border border-gray-300 shadow-sm px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none' },
 };
 </script>
 
@@ -114,11 +117,10 @@ const textareaPt = {
     :pt="dialogPt"
     @update:visible="(v) => !v && closeModal()"
   >
-    <form @submit.prevent="submitForm" class="space-y-4">
-
-      <div class="grid grid-cols-2 gap-4">
+    <form @submit.prevent="submitForm" class="space-y-3 sm:space-y-3.5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">日付</label>
+          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">日付</label>
           <DatePicker
             v-model="formData.date"
             dateFormat="yy-mm-dd"
@@ -127,7 +129,7 @@ const textareaPt = {
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">金額 (円)</label>
+          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">金額 (円)</label>
           <InputNumber
             v-model="formData.amount"
             :min="1"
@@ -139,9 +141,9 @@ const textareaPt = {
           />
         </div>
       </div>
-
+    
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">カテゴリ</label>
+        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">カテゴリ</label>
         <Select
           v-model="formData.category_id"
           :options="store.categories"
@@ -152,10 +154,10 @@ const textareaPt = {
           :pt="selectPt"
         />
       </div>
-
-      <div class="grid grid-cols-2 gap-4">
+    
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">店舗名</label>
+          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">店舗名</label>
           <InputText
             v-model="formData.shop"
             required
@@ -164,7 +166,7 @@ const textareaPt = {
           />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">商品・内容</label>
+          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">商品・内容</label>
           <InputText
             v-model="formData.content"
             required
@@ -173,9 +175,9 @@ const textareaPt = {
           />
         </div>
       </div>
-
+    
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">支払者</label>
+        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">支払者</label>
         <Select
           v-model="formData.payer"
           :options="store.payers"
@@ -186,19 +188,18 @@ const textareaPt = {
           :pt="selectPt"
         />
       </div>
-
+    
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">備考</label>
+        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">備考</label>
         <Textarea
           v-model="formData.description"
           :rows="2"
           :pt="textareaPt"
         />
       </div>
-
-      <!-- Footer Actions -->
-      <div class="flex items-center justify-between pt-4 border-t border-gray-200 mt-2">
-        <label class="flex items-center text-sm text-gray-600 gap-2 cursor-pointer">
+    
+      <div class="flex flex-col gap-3 pt-3 border-t border-gray-200 mt-1 sm:flex-row sm:items-center sm:justify-between">
+        <label class="flex items-center text-sm text-gray-600 gap-2 cursor-pointer w-full sm:w-auto">
           <Checkbox
             v-model="isContinuous"
             binary
@@ -210,20 +211,20 @@ const textareaPt = {
           />
           連続入力する
         </label>
-        <div class="flex gap-3">
+        <div class="flex w-full gap-2 sm:w-auto">
           <Button
             type="button"
             label="キャンセル"
             @click="closeModal"
             :pt="{
-              root: { class: 'px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 cursor-pointer' },
+              root: { class: 'flex-1 sm:flex-none px-3.5 py-2 sm:py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 cursor-pointer' },
             }"
           />
           <Button
             type="submit"
             label="保存"
             :pt="{
-              root: { class: 'px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 cursor-pointer' },
+              root: { class: 'flex-1 sm:flex-none px-3.5 py-2 sm:py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent shadow-sm hover:bg-blue-700 cursor-pointer' },
             }"
           />
         </div>
