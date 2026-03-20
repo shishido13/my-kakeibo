@@ -1,18 +1,41 @@
 import { defineStore } from 'pinia'
 import api from '../services/api'
 
-interface Category { id: number; name: string; }
-interface Payer { id: number; name: string; }
+export interface Category { id: number; name: string; }
+export interface Payer { id: number; name: string; }
+
+export interface TransactionRecord {
+  id: number;
+  date: string;
+  amount: number;
+  category_id: number;
+  shop: string;
+  content: string;
+  payer: string;
+  description?: string | null;
+  source_type?: string;
+  created_at?: string;
+}
 
 export const useTransactionStore = defineStore('transactions', {
   state: () => ({
-    transactions: [] as any[],
+    transactions: [] as TransactionRecord[],
     categories: [] as Category[],
     payers: [] as Payer[],
     isLoading: false,
     error: null as any
   }),
   actions: {
+    syncTransaction(transaction: TransactionRecord) {
+      const existingIndex = this.transactions.findIndex((current) => current.id === transaction.id)
+
+      if (existingIndex === -1) {
+        this.transactions.unshift(transaction)
+        return
+      }
+
+      this.transactions.splice(existingIndex, 1, transaction)
+    },
     async fetchTransactions(filters: any = {}) {
       this.isLoading = true
       try {
@@ -48,7 +71,22 @@ export const useTransactionStore = defineStore('transactions', {
     async addTransaction(transactionData: any) {
       try {
         const response = await api.post('/transactions/', transactionData)
-        this.transactions.unshift(response.data) // Add new item to front of list
+        this.syncTransaction(response.data)
+        this.transactions.sort((left, right) => right.date.localeCompare(left.date))
+        // Add new item to front of list
+        this.error = null
+        return true
+      } catch (error) {
+        this.error = error
+        return false
+      }
+    },
+    async updateTransaction(id: number, transactionData: any) {
+      try {
+        const response = await api.put(`/transactions/${id}`, transactionData)
+        this.syncTransaction(response.data)
+        this.transactions.sort((left, right) => right.date.localeCompare(left.date))
+        this.error = null
         return true
       } catch (error) {
         this.error = error
@@ -60,6 +98,7 @@ export const useTransactionStore = defineStore('transactions', {
         await api.delete(`/transactions/${id}`)
          // Remove from local state
         this.transactions = this.transactions.filter(t => t.id !== id)
+        this.error = null
         return true
        } catch (error) {
         this.error = error

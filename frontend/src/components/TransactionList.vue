@@ -3,29 +3,16 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Tag from 'primevue/tag';
 import Button from 'primevue/button';
-
-interface Transaction {
-  id: number;
-  date: string;
-  category_id: number;
-  shop: string;
-  content: string;
-  amount: number;
-  payer: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-}
+import type { Category, TransactionRecord } from '../stores/transaction';
 
 const props = defineProps<{
-  transactions: Transaction[];
+  transactions: TransactionRecord[];
   categories: Category[];
 }>();
 
 const emit = defineEmits<{
   (e: 'delete', id: number): void
+  (e: 'edit', transaction: TransactionRecord): void
 }>();
 
 const getCategoryName = (id: number) => {
@@ -111,22 +98,35 @@ const formatCurrency = (amount: number) => {
       <Column
         header=""
         :pt="{
-          headerCell: { class: 'px-4 py-3 bg-gray-50 border-b border-gray-200 w-12' },
+          headerCell: { class: 'px-4 py-3 bg-gray-50 border-b border-gray-200 w-20' },
           bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-right text-xs' },
         }"
       >
         <template #body="{ data }">
-          <Button
-            icon="pi pi-trash"
-            aria-label="削除"
-            @click="emit('delete', data.id)"
-            plain
-            text
-            :pt="{
-              root: { class: 'text-gray-300 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-all cursor-pointer' },
-              icon: { class: 'text-xs' },
-            }"
-          />
+          <div class="flex items-center justify-end gap-1">
+            <Button
+              icon="pi pi-pencil"
+              aria-label="編集"
+              @click="emit('edit', data)"
+              plain
+              text
+              :pt="{
+                root: { class: 'text-gray-300 hover:text-blue-500 p-1.5 rounded-full hover:bg-blue-50 transition-all cursor-pointer' },
+                icon: { class: 'text-xs' },
+              }"
+            />
+            <Button
+              icon="pi pi-trash"
+              aria-label="削除"
+              @click="emit('delete', data.id)"
+              plain
+              text
+              :pt="{
+                root: { class: 'text-gray-300 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-all cursor-pointer' },
+                icon: { class: 'text-xs' },
+              }"
+            />
+          </div>
         </template>
       </Column>
 

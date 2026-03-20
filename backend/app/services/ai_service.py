@@ -4,13 +4,13 @@ import asyncio
 import tempfile
 from typing import Dict, Any, List
 from google import genai
-from sqlmodel import Session
 from app.core.config import settings
 from app.crud import category, payer
+from app.db.session import DatabaseSession
 
 # Using google-genai Client internally
 
-async def analyze_pdf_receipt(file_bytes: bytes, filename: str, db: Session) -> List[Dict[str, Any]]:
+async def analyze_pdf_receipt(file_bytes: bytes, filename: str, db: DatabaseSession) -> List[Dict[str, Any]]:
     if not settings.GEMINI_API_KEY:
         raise ValueError("GEMINI_API_KEY is not set in environment variables.")
 

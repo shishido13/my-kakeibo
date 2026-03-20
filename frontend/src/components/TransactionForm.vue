@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useTransactionStore } from '../stores/transaction';
+import type { TransactionRecord } from '../stores/transaction';
 import Dialog from 'primevue/dialog';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
@@ -12,13 +13,16 @@ import Button from 'primevue/button';
 
 const props = defineProps<{
   isOpen: boolean;
+  mode: 'create' | 'edit';
+  selectedTransaction: TransactionRecord | null;
 }>();
 const emit = defineEmits<{
   (e: 'close'): void
 }>();
 const store = useTransactionStore();
+const DEFAULT_PAYER = '俊介';
 
-interface TransactionForm {
+interface TransactionFormState {
   date: Date | null;
   amount: number | null;
   category_id: number | null;
@@ -28,41 +32,93 @@ interface TransactionForm {
   description: string;
 }
 
-const formData = ref<TransactionForm>({
+const toDate = (value: string) => {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const formatDateForApi = (value: Date | null) => {
+  const source = value ?? new Date();
+  const year = source.getFullYear();
+  const month = `${source.getMonth() + 1}`.padStart(2, '0');
+  const day = `${source.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const createEmptyForm = (overrides: Partial<TransactionFormState> = {}): TransactionFormState => ({
   date: new Date(),
   amount: null,
   category_id: null,
   shop: '',
   content: '',
-  payer: '俊介',
+  payer: DEFAULT_PAYER,
   description: '',
+  ...overrides,
 });
+
+const formData = ref<TransactionFormState>(createEmptyForm());
 
 const isContinuous = ref(false);
 
-const resetForm = () => {
-  formData.value = {
-    date: formData.value.date,
-    amount: null,
-    category_id: null,
-    shop: '',
-    content: '',
-    payer: formData.value.payer,
-    description: '',
-  };
+const dialogTitle = computed(() => props.mode === 'edit' ? '取引を編集' : '新規登録');
+
+const submitLabel = computed(() => props.mode === 'edit' ? '更新' : '保存');
+
+const showContinuousOption = computed(() => props.mode === 'create');
+
+const resetForm = (overrides: Partial<TransactionFormState> = {}) => {
+  formData.value = createEmptyForm(overrides);
 };
+
+const populateForm = (transaction: TransactionRecord) => {
+  formData.value = createEmptyForm({
+    date: toDate(transaction.date),
+    amount: transaction.amount,
+    category_id: transaction.category_id,
+    shop: transaction.shop,
+    content: transaction.content,
+    payer: transaction.payer,
+    description: transaction.description ?? '',
+  });
+};
+
+watch(
+  () => [props.isOpen, props.mode, props.selectedTransaction] as const,
+  ([isOpen, mode, selectedTransaction]) => {
+    if (!isOpen) {
+      resetForm();
+      isContinuous.value = false;
+      return;
+    }
+
+    if (mode === 'edit' && selectedTransaction) {
+      populateForm(selectedTransaction);
+      isContinuous.value = false;
+      return;
+    }
+
+    resetForm();
+    isContinuous.value = false;
+  },
+  { immediate: true }
+);
 
 const submitForm = async () => {
   const payload = {
     ...formData.value,
-    date: formData.value.date
-      ? formData.value.date.toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0],
+    date: formatDateForApi(formData.value.date),
   };
-  const success = await store.addTransaction(payload);
+
+  const success = props.mode === 'edit' && props.selectedTransaction
+    ? await store.updateTransaction(props.selectedTransaction.id, payload)
+    : await store.addTransaction(payload);
+
   if (success) {
-    if (isContinuous.value) {
-      resetForm();
+    if (props.mode === 'create' && isContinuous.value) {
+      resetForm({
+        date: formData.value.date,
+        payer: formData.value.payer,
+      });
     } else {
       closeModal();
     }
@@ -73,6 +129,7 @@ const submitForm = async () => {
 
 const closeModal = () => {
   resetForm();
+  isContinuous.value = false;
   emit('close');
 };
 
@@ -112,7 +169,7 @@ const textareaPt = {
   <Dialog
     :visible="isOpen"
     modal
-    header="新規登録"
+    :header="dialogTitle"
     :closable="true"
     :pt="dialogPt"
     @update:visible="(v) => !v && closeModal()"
@@ -199,7 +256,10 @@ const textareaPt = {
       </div>
     
       <div class="flex flex-col gap-3 pt-3 border-t border-gray-200 mt-1 sm:flex-row sm:items-center sm:justify-between">
-        <label class="flex items-center text-sm text-gray-600 gap-2 cursor-pointer w-full sm:w-auto">
+        <label
+          v-if="showContinuousOption"
+          class="flex items-center text-sm text-gray-600 gap-2 cursor-pointer w-full sm:w-auto"
+        >
           <Checkbox
             v-model="isContinuous"
             binary
@@ -211,6 +271,7 @@ const textareaPt = {
           />
           連続入力する
         </label>
+        <span v-else class="text-xs text-gray-400">既存の取引を更新します</span>
         <div class="flex w-full gap-2 sm:w-auto">
           <Button
             type="button"
@@ -222,7 +283,7 @@ const textareaPt = {
           />
           <Button
             type="submit"
-            label="保存"
+            :label="submitLabel"
             :pt="{
               root: { class: 'flex-1 sm:flex-none px-3.5 py-2 sm:py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent shadow-sm hover:bg-blue-700 cursor-pointer' },
             }"

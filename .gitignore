@@ -73,5 +73,3 @@ Desktop.ini
 test_results.txt
 test_upload.py
 test_all_endpoints.py
-
-Dockerfile

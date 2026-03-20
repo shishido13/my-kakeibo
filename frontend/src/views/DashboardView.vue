@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
 import { useTransactionStore } from '../stores/transaction';
+import type { TransactionRecord } from '../stores/transaction';
 import { useImportStore } from '../stores/useImportStore';
 import { useRouter } from 'vue-router';
-import TransactionList from '@/components/TransactionList.vue';
-import TransactionForm from '@/components/TransactionForm.vue';
 import Button from 'primevue/button';
 import MultiSelect from 'primevue/multiselect';
+
+const TransactionList = defineAsyncComponent(() => import('../components/TransactionList.vue').then((module: any) => module.default ?? module));
+const TransactionForm = defineAsyncComponent(() => import('../components/TransactionForm.vue').then((module: any) => module.default ?? module));
 
 const store = useTransactionStore();
 const importStore = useImportStore();
 const router = useRouter();
 const isModalOpen = ref(false);
+const modalMode = ref<'create' | 'edit'>('create');
+const selectedTransaction = ref<TransactionRecord | null>(null);
 const isFilterVisible = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -24,12 +28,20 @@ const filters = ref({
 });
 
 const handleSearch = () => {
-    const activeFilters = Object.fromEntries(
-        Object.entries(filters.value).filter(([key, value]) => {
-            if (Array.isArray(value)) return value.length > 0;
-            return value !== '' && value !== null;
-        })
-    );
+   const activeFilters = Object.entries(filters.value).reduce<Record<string, string | number[]>>((result, [key, value]) => {
+      if (Array.isArray(value)) {
+         if (value.length > 0) {
+            result[key] = value;
+         }
+         return result;
+      }
+
+      if (value !== '' && value !== null) {
+         result[key] = value;
+      }
+
+      return result;
+   }, {});
     store.fetchTransactions(activeFilters);
 };
 
@@ -46,6 +58,24 @@ const handleReset = () => {
 
 const triggerFileInput = () => {
     fileInput.value?.click();
+};
+
+const openCreateModal = () => {
+   modalMode.value = 'create';
+   selectedTransaction.value = null;
+   isModalOpen.value = true;
+};
+
+const openEditModal = (transaction: TransactionRecord) => {
+   modalMode.value = 'edit';
+   selectedTransaction.value = transaction;
+   isModalOpen.value = true;
+};
+
+const handleModalClose = () => {
+   isModalOpen.value = false;
+   selectedTransaction.value = null;
+   modalMode.value = 'create';
 };
 
 const handleFileUpload = async (event: Event) => {
@@ -147,7 +177,7 @@ const formatCurrency = (amount: number) => {
             <Button
               label="新規作成"
               icon="pi pi-plus"
-              @click="isModalOpen = true"
+                     @click="openCreateModal"
               :pt="{
                 root: { class: 'bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow-sm transition duration-200 flex items-center gap-2 cursor-pointer' },
                 label: { class: 'text-sm' },
@@ -265,6 +295,7 @@ const formatCurrency = (amount: number) => {
              <TransactionList 
                :transactions="store.transactions" 
                :categories="store.categories"
+                      @edit="openEditModal"
                @delete="store.deleteTransaction"
              />
           </div>
@@ -275,7 +306,9 @@ const formatCurrency = (amount: number) => {
     <!-- Modal Form -->
     <TransactionForm 
       :isOpen="isModalOpen" 
-      @close="isModalOpen = false" 
+         :mode="modalMode"
+         :selectedTransaction="selectedTransaction"
+         @close="handleModalClose" 
     />
   </div>
 </template>
