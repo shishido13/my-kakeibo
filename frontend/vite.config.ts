@@ -8,6 +8,14 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      }
+    }
+  },
   define: {
     'process.env': {},
     '__dirname': JSON.stringify(''),

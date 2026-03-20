@@ -5,9 +5,11 @@ import requests
 from app.core.config import settings
 
 router = APIRouter()
+FRONTEND_CALLBACK_PATH = "/auth/callback/google"
 
 class GoogleAuthRequest(BaseModel):
     code: str
+    redirect_uri: str | None = None
 
 @router.get("/callback/google/backend")
 async def google_callback(request: Request, code: str = Query(...)):
@@ -20,7 +22,7 @@ async def google_callback(request: Request, code: str = Query(...)):
         base_url = str(request.base_url).rstrip('/')
         if "run.app" in base_url and base_url.startswith("http://"):
             base_url = base_url.replace("http://", "https://")
-        redirect_uri = f"{base_url}/api/auth/callback/google"
+        redirect_uri = f"{base_url}{FRONTEND_CALLBACK_PATH}"
     
     print(f"DEBUG: google_callback redirect_uri={redirect_uri}")
     
@@ -62,7 +64,7 @@ async def google_callback(request: Request, code: str = Query(...)):
 
 @router.post("/google")
 async def google_auth(data: GoogleAuthRequest):
-    redirect_uri = settings.REDIRECT_URI or "http://localhost:5173/api/auth/callback/google"
+    redirect_uri = data.redirect_uri or settings.REDIRECT_URI or f"http://localhost:5173{FRONTEND_CALLBACK_PATH}"
     print(f"DEBUG: google_auth redirect_uri={redirect_uri}")
 
     token_url = "https://oauth2.googleapis.com/token"

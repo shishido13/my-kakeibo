@@ -12,7 +12,7 @@ def get_transaction(session: Session, transaction_id: int) -> Optional[Transacti
 def get_transactions(
     session: Session, 
     skip: int = 0, 
-    limit: int = 100,
+    limit: int = 1000,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     category_ids: Optional[List[int]] = None,

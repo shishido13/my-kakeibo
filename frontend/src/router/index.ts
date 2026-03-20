@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
 import ImportVerifyView from '../views/ImportVerifyView.vue'
-import { auth } from '../auth.ts'
+import { GOOGLE_AUTH_CALLBACK_PATH } from '../auth.ts'
 import LoginView from '../views/LoginView.vue'
 
 const router = createRouter({
@@ -28,7 +28,7 @@ const router = createRouter({
       component: LoginView
     },
     {
-      path: '/api/auth/callback/google',
+      path: GOOGLE_AUTH_CALLBACK_PATH,
       name: 'AuthCallback',
       component: () => import('../views/AuthCallback.vue')
     }
@@ -37,7 +37,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ['/login', '/api/auth/callback/google'];
+  const publicPages = ['/login', GOOGLE_AUTH_CALLBACK_PATH];
   const authRequired = !publicPages.includes(to.path);
   const isAuthenticated = localStorage.getItem('isLoggedIn'); // 暫定的なフラグ
 
