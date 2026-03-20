@@ -3,6 +3,7 @@ import DashboardView from '../views/DashboardView.vue'
 import ImportVerifyView from '../views/ImportVerifyView.vue'
 import { GOOGLE_AUTH_CALLBACK_PATH } from '../auth.ts'
 import LoginView from '../views/LoginView.vue'
+import SettlementView from '../views/SettlementView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +22,11 @@ const router = createRouter({
       path: '/analytics',
       name: 'analytics',
       component: () => import('../views/AnalyticsView.vue')
+    },
+    {
+      path: '/settlement',
+      name: 'settlement',
+      component: SettlementView
     },
     {
       path: '/login',

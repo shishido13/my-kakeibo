@@ -132,9 +132,9 @@ const formatCurrency = (amount: number) => {
     <div class="max-w-[1440px] w-full mx-auto flex flex-col h-full bg-transparent">
         
        <!-- Header Section -->
-       <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4 border-b border-gray-200 pb-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 gap-3 border-b border-gray-200 pb-4 md:mb-6 md:gap-4 md:pb-6">
           <div class="flex-1">
-             <div class="flex items-center gap-4">
+             <div class="flex items-center gap-3 md:gap-4">
                 <h1 class="text-2xl font-bold text-gray-900">ダッシュボード</h1>
                 <!-- Compact Stats Bar Integrated in Header -->
                 <div class="hidden lg:flex items-center gap-6 ml-4 py-1 px-4 bg-gray-50 rounded-full border border-gray-200">
@@ -149,10 +149,10 @@ const formatCurrency = (amount: number) => {
                    </div>
                 </div>
              </div>
-             <p class="text-xs text-gray-400 mt-0.5">家計簿の履歴と管理</p>
+             <p class="mt-0.5 text-[11px] text-gray-400 md:text-xs">家計簿の履歴と管理</p>
           </div>
-          
-          <div class="flex items-center gap-2 w-full md:w-auto">
+
+               <div class="hidden md:flex md:items-center md:gap-2 md:w-auto">
             <Button
               icon="pi pi-chart-bar"
               @click="router.push('/analytics')"
@@ -163,6 +163,16 @@ const formatCurrency = (amount: number) => {
                 icon: { class: 'text-sm text-blue-500' }
               }"
             />
+                  <Button
+                     icon="pi pi-calculator"
+                     @click="router.push('/settlement')"
+                     label="精算"
+                     :pt="{
+                        root: { class: 'bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-200 transition duration-200 flex items-center gap-2 cursor-pointer shadow-sm' },
+                        label: { class: 'text-sm' },
+                        icon: { class: 'text-sm text-emerald-500' }
+                     }"
+                  />
             <div class="h-8 w-px bg-gray-200 mx-1 hidden md:block"></div>
             <Button
               :icon="isFilterVisible ? 'pi pi-filter-slash' : 'pi pi-filter'"
@@ -198,18 +208,75 @@ const formatCurrency = (amount: number) => {
               }"
             />
           </div>
+
+               <div class="grid w-full grid-cols-2 gap-1.5 md:hidden">
+                  <Button
+                     icon="pi pi-chart-bar"
+                     @click="router.push('/analytics')"
+                     label="レポート"
+                     :pt="{
+                        root: { class: 'min-h-[46px] justify-center rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-gray-700 shadow-sm transition duration-200 hover:bg-gray-50' },
+                        label: { class: 'text-[13px] font-semibold' },
+                        icon: { class: 'text-[13px] text-blue-500 mr-1.5' }
+                     }"
+                  />
+                  <Button
+                     icon="pi pi-calculator"
+                     @click="router.push('/settlement')"
+                     label="精算"
+                     :pt="{
+                        root: { class: 'min-h-[46px] justify-center rounded-xl border border-gray-200 bg-white px-2.5 py-2 text-gray-700 shadow-sm transition duration-200 hover:bg-gray-50' },
+                        label: { class: 'text-[13px] font-semibold' },
+                        icon: { class: 'text-[13px] text-emerald-500 mr-1.5' }
+                     }"
+                  />
+                  <Button
+                     :icon="isFilterVisible ? 'pi pi-filter-slash' : 'pi pi-filter'"
+                     @click="isFilterVisible = !isFilterVisible"
+                     :label="isFilterVisible ? '絞り込みを閉じる' : '絞り込み'"
+                     :pt="{
+                        root: { class: [
+                           'min-h-[46px] justify-center rounded-xl border px-2.5 py-2 shadow-sm transition duration-200',
+                           isFilterVisible ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                        ] },
+                        label: { class: 'text-[13px] font-semibold' },
+                        icon: { class: 'text-[13px] mr-1.5' }
+                     }"
+                  />
+                  <Button
+                     label="PDF登録"
+                     icon="pi pi-upload"
+                     @click="triggerFileInput"
+                     :pt="{
+                        root: { class: 'min-h-[46px] justify-center rounded-xl border border-indigo-100 bg-indigo-50 px-2.5 py-2 text-indigo-700 shadow-sm transition duration-200 hover:bg-indigo-100' },
+                        label: { class: 'text-[13px] font-semibold' },
+                        icon: { class: 'text-[13px] mr-1.5' },
+                     }"
+                  />
+                  <input type="file" ref="fileInput" accept="application/pdf" class="hidden" @change="handleFileUpload">
+                  <Button
+                     label="新規作成"
+                     icon="pi pi-plus"
+                     @click="openCreateModal"
+                     :pt="{
+                        root: { class: 'col-span-2 min-h-[48px] justify-center rounded-xl bg-blue-600 px-3 py-2 text-white shadow-sm transition duration-200 hover:bg-blue-700' },
+                        label: { class: 'text-[13px] font-semibold' },
+                        icon: { class: 'text-[13px] mr-1.5' },
+                     }"
+                  />
+               </div>
        </div>
 
        <!-- Mobile/Small Screen Stats Bar -->
-       <div class="lg:hidden flex items-center justify-around bg-white border border-gray-200 rounded-lg py-2 px-4 shadow-sm mb-6">
+      <div class="lg:hidden flex items-center justify-around bg-white border border-gray-200 rounded-lg py-1 px-3 shadow-sm mb-3">
           <div class="flex flex-col items-center">
-             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">総合計支出</span>
-             <span class="text-base font-bold text-blue-600">{{ formatCurrency(totalAmount) }}</span>
+             <span class="text-[9px] text-gray-400 font-bold uppercase tracking-[0.18em]">総合計支出</span>
+             <span class="text-sm font-bold text-blue-600 leading-tight">{{ formatCurrency(totalAmount) }}</span>
           </div>
-          <div class="w-px h-6 bg-gray-100"></div>
+          <div class="w-px h-5 bg-gray-100"></div>
           <div class="flex flex-col items-center">
-             <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">登録件数</span>
-             <span class="text-base font-bold text-green-600">{{ store.transactions.length }}<span class="text-[10px] ml-0.5">件</span></span>
+             <span class="text-[9px] text-gray-400 font-bold uppercase tracking-[0.18em]">登録件数</span>
+             <span class="text-sm font-bold text-green-600 leading-tight">{{ store.transactions.length }}<span class="text-[9px] ml-0.5">件</span></span>
           </div>
        </div>
 
