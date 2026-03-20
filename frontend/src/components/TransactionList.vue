@@ -96,6 +96,22 @@ const formatCurrency = (amount: number) => {
         }"
       />
       <Column
+        header="支出タイプ"
+        :pt="{
+          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
+          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-500 font-medium' },
+        }"
+      >
+        <template #body="{ data }">
+          <Tag
+            :value="data.expense_type_name"
+            :pt="{
+              root: { class: 'px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-emerald-50 text-emerald-700 border border-emerald-100' },
+            }"
+          />
+        </template>
+      </Column>
+      <Column
         header=""
         :pt="{
           headerCell: { class: 'px-4 py-3 bg-gray-50 border-b border-gray-200 w-20' },

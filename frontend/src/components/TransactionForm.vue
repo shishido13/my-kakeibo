@@ -21,11 +21,13 @@ const emit = defineEmits<{
 }>();
 const store = useTransactionStore();
 const DEFAULT_PAYER = '俊介';
+const DEFAULT_EXPENSE_TYPE_ID = 1;
 
 interface TransactionFormState {
   date: Date | null;
   amount: number | null;
   category_id: number | null;
+  expense_type_id: number;
   shop: string;
   content: string;
   payer: string;
@@ -49,6 +51,7 @@ const createEmptyForm = (overrides: Partial<TransactionFormState> = {}): Transac
   date: new Date(),
   amount: null,
   category_id: null,
+  expense_type_id: DEFAULT_EXPENSE_TYPE_ID,
   shop: '',
   content: '',
   payer: DEFAULT_PAYER,
@@ -75,6 +78,7 @@ const populateForm = (transaction: TransactionRecord) => {
     date: toDate(transaction.date),
     amount: transaction.amount,
     category_id: transaction.category_id,
+    expense_type_id: transaction.expense_type_id,
     shop: transaction.shop,
     content: transaction.content,
     payer: transaction.payer,
@@ -204,6 +208,19 @@ const textareaPt = {
         <Select
           v-model="formData.category_id"
           :options="store.categories"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="選択してください"
+          required
+          :pt="selectPt"
+        />
+      </div>
+
+      <div>
+        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">支出タイプ</label>
+        <Select
+          v-model="formData.expense_type_id"
+          :options="store.expenseTypes"
           optionLabel="name"
           optionValue="id"
           placeholder="選択してください"

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useImportStore } from '@/stores/useImportStore'
-import { useTransactionStore } from '@/stores/transaction'
+import { useImportStore } from '../stores/useImportStore'
+import { useTransactionStore } from '../stores/transaction'
 import Button from 'primevue/button'
 import Select from 'primevue/select'
 import InputText from 'primevue/inputtext'
@@ -21,6 +21,9 @@ onMounted(async () => {
     if (transactionStore.payers.length === 0) {
         await transactionStore.fetchPayers()
     }
+  if (transactionStore.expenseTypes.length === 0) {
+    await transactionStore.fetchExpenseTypes()
+  }
     
     // If we land here and no file is set, redirect to home
     if (!importStore.originalFile) {
@@ -72,6 +75,7 @@ const allSelected = computed(() => {
 
 const bulkCategory = ref<number | ''>('')
 const bulkPayer = ref<string>('')
+const bulkExpenseType = ref<number | ''>('')
 
 const applyBulkChanges = () => {
     if (selectedRows.value.size === 0) return alert('適用する行を選択してください')
@@ -80,10 +84,12 @@ const applyBulkChanges = () => {
         const item = importStore.pendingTransactions[index]
         if (bulkCategory.value) item.category_id = bulkCategory.value as number
         if (bulkPayer.value) item.payer = bulkPayer.value
+    if (bulkExpenseType.value) item.expense_type_id = bulkExpenseType.value as number
     })
     
     bulkCategory.value = ''
     bulkPayer.value = ''
+  bulkExpenseType.value = ''
 }
 
 /** Shared pt definitions */
@@ -163,6 +169,14 @@ const inlineInputPt = { root: { class: 'w-full border border-gray-300 rounded p-
                  placeholder="支払者変更..."
                  :pt="selectPt"
                />
+               <Select
+                 v-model="bulkExpenseType"
+                 :options="transactionStore.expenseTypes"
+                 optionLabel="name"
+                 optionValue="id"
+                 placeholder="支出タイプ変更..."
+                 :pt="selectPt"
+               />
                <Button
                  label="適用"
                  @click="applyBulkChanges"
@@ -197,6 +211,7 @@ const inlineInputPt = { root: { class: 'w-full border border-gray-300 rounded p-
                            <th class="p-2 w-32 border-b">日付</th>
                            <th class="p-2 w-32 border-b">カテゴリ</th>
                            <th class="p-2 w-24 border-b">金額</th>
+                           <th class="p-2 w-28 border-b">支出タイプ</th>
                            <th class="p-2 border-b">店舗</th>
                            <th class="p-2 border-b">商品・サービス</th>
                            <th class="p-2 w-24 border-b">支払者</th>
@@ -251,6 +266,21 @@ const inlineInputPt = { root: { class: 'w-full border border-gray-300 rounded p-
                              />
                            </td>
                            <td class="p-2">
+                             <Select
+                               v-model="item.expense_type_id"
+                               :options="transactionStore.expenseTypes"
+                               optionLabel="name"
+                               optionValue="id"
+                               :pt="{
+                                 root: { class: 'w-full border border-gray-300 rounded p-1 bg-white cursor-pointer flex items-center gap-1 text-sm' },
+                                 label: { class: 'flex-1 text-sm text-gray-700' },
+                                 panel: { class: 'bg-white border border-gray-200 rounded shadow-lg z-50 text-sm' },
+                                 list: { class: 'py-1 max-h-48 overflow-auto' },
+                                 option: { class: 'px-3 py-1.5 hover:bg-blue-50 cursor-pointer data-[p-selected=true]:bg-blue-100' },
+                               }"
+                             />
+                           </td>
+                           <td class="p-2">
                              <InputText v-model="item.shop" :pt="inlineInputPt" />
                            </td>
                            <td class="p-2">
@@ -271,7 +301,7 @@ const inlineInputPt = { root: { class: 'w-full border border-gray-300 rounded p-
                            </td>
                        </tr>
                        <tr v-if="importStore.pendingTransactions.length === 0 && !importStore.isAnalyzing">
-                           <td colspan="8" class="text-center p-8 text-gray-500">データが見つかりません。再解析するか手動で追加してください。</td>
+                           <td colspan="9" class="text-center p-8 text-gray-500">データが見つかりません。再解析するか手動で追加してください。</td>
                        </tr>
                    </tbody>
                </table>

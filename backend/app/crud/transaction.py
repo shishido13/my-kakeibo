@@ -2,12 +2,11 @@ from datetime import date, datetime
 from typing import List, Optional
 
 from app.db.session import DatabaseSession
-from app.models.transaction import Transaction
-from app.schemas.transaction import TransactionCreate, TransactionUpdate
+from app.schemas.transaction import TransactionCreate, TransactionRead, TransactionUpdate
 
 
-def _row_to_transaction(row: dict | None) -> Optional[Transaction]:
-    return Transaction.model_validate(row) if row else None
+def _row_to_transaction(row: dict | None) -> Optional[TransactionRead]:
+    return TransactionRead.model_validate(row) if row else None
 
 
 def _serialize_date(value: date) -> str:
@@ -18,9 +17,13 @@ def _escape_text(value: str) -> str:
     return value.replace("'", "''")
 
 
-def get_transaction(session: DatabaseSession, transaction_id: int) -> Optional[Transaction]:
+def get_transaction(session: DatabaseSession, transaction_id: int) -> Optional[TransactionRead]:
     row = session.fetch_one(
-        f"SELECT id, date, amount, category_id, shop, content, payer, description, source_type, created_at FROM t_transaction WHERE id = {transaction_id}"
+        "SELECT t.id, t.date, t.amount, t.category_id, t.expense_type_id, et.name AS expense_type_name, "
+        "t.shop, t.content, t.payer, t.description, t.source_type, t.created_at "
+        "FROM t_transaction t "
+        "JOIN m_expense_type et ON et.id = t.expense_type_id "
+        f"WHERE t.id = {transaction_id}"
     )
     return _row_to_transaction(row)
 
@@ -31,9 +34,10 @@ def get_transactions(
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     category_ids: Optional[List[int]] = None,
+    expense_type_id: Optional[int] = None,
     payer: Optional[str] = None,
     keyword: Optional[str] = None
-) -> List[Transaction]:
+) -> List[TransactionRead]:
     conditions: list[str] = []
 
     if start_date:
@@ -43,6 +47,8 @@ def get_transactions(
     if category_ids:
         category_list = ', '.join(str(category_id) for category_id in category_ids)
         conditions.append(f"category_id IN ({category_list})")
+    if expense_type_id:
+        conditions.append(f"expense_type_id = {expense_type_id}")
     if payer:
         conditions.append(f"payer = '{_escape_text(payer)}'")
     if keyword:
@@ -57,10 +63,13 @@ def get_transactions(
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ''
     rows = session.fetch_all(
-        "SELECT id, date, amount, category_id, shop, content, payer, description, source_type, created_at "
-        f"FROM t_transaction {where_clause} ORDER BY date DESC, id DESC LIMIT {limit} OFFSET {skip}"
+        "SELECT t.id, t.date, t.amount, t.category_id, t.expense_type_id, et.name AS expense_type_name, "
+        "t.shop, t.content, t.payer, t.description, t.source_type, t.created_at "
+        "FROM t_transaction t "
+        "JOIN m_expense_type et ON et.id = t.expense_type_id "
+        f"{where_clause} ORDER BY t.date DESC, t.id DESC LIMIT {limit} OFFSET {skip}"
     )
-    return [Transaction.model_validate(row) for row in rows]
+    return [TransactionRead.model_validate(row) for row in rows]
 
 def get_analytics_summary(
     session: DatabaseSession,
@@ -140,7 +149,7 @@ def get_analytics_trend(
     return trend_rows
 
 
-def create_transaction(session: DatabaseSession, transaction_in: TransactionCreate) -> Transaction:
+def create_transaction(session: DatabaseSession, transaction_in: TransactionCreate) -> TransactionRead:
     created_at = datetime.utcnow()
     transaction_id = session.insert(
         't_transaction',
@@ -148,6 +157,7 @@ def create_transaction(session: DatabaseSession, transaction_in: TransactionCrea
             'date': transaction_in.date,
             'amount': transaction_in.amount,
             'category_id': transaction_in.category_id,
+            'expense_type_id': transaction_in.expense_type_id,
             'shop': transaction_in.shop,
             'content': transaction_in.content,
             'payer': transaction_in.payer,
@@ -159,7 +169,7 @@ def create_transaction(session: DatabaseSession, transaction_in: TransactionCrea
     return get_transaction(session, int(transaction_id))
 
 
-def update_transaction(session: DatabaseSession, transaction_id: int, transaction_in: TransactionUpdate) -> Optional[Transaction]:
+def update_transaction(session: DatabaseSession, transaction_id: int, transaction_in: TransactionUpdate) -> Optional[TransactionRead]:
     existing = get_transaction(session, transaction_id)
     if not existing:
         return None

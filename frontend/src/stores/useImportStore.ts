@@ -7,6 +7,7 @@ export interface DraftTransaction {
     date: string;
     amount: number;
     category_id: number;
+    expense_type_id: number;
     shop: string;
     content: string;
     payer: string;

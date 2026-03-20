@@ -6,6 +6,7 @@ class TransactionBase(SQLModel):
     date: date
     amount: int
     category_id: int = Field(foreign_key="m_category.id")
+    expense_type_id: int = Field(default=1, foreign_key="m_expense_type.id")
     shop: str
     content: str
     payer: str

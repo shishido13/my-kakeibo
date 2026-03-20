@@ -6,6 +6,7 @@ class TransactionCreate(BaseModel):
     date: DateType
     amount: int
     category_id: int
+    expense_type_id: Literal[1, 2] = 1
     shop: str
     content: str
     payer: str
@@ -16,6 +17,7 @@ class TransactionUpdate(BaseModel):
     date: Optional[DateType] = None
     amount: Optional[int] = None
     category_id: Optional[int] = None
+    expense_type_id: Optional[Literal[1, 2]] = None
     shop: Optional[str] = None
     content: Optional[str] = None
     payer: Optional[str] = None
@@ -27,6 +29,8 @@ class TransactionRead(BaseModel):
     date: DateType
     amount: int
     category_id: int
+    expense_type_id: int
+    expense_type_name: str
     shop: str
     content: str
     payer: str

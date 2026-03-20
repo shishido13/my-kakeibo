@@ -15,6 +15,7 @@ def read_transactions(
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
     category_ids: List[int] = Query(None),
+    expense_type_id: Optional[int] = Query(None, ge=1, le=2),
     payer: Optional[str] = None,
     keyword: Optional[str] = None,
     session: DatabaseSession = Depends(get_session)
@@ -22,7 +23,7 @@ def read_transactions(
     return crud_transaction.get_transactions(
         session, skip=skip, limit=limit, 
         start_date=start_date, end_date=end_date, 
-        category_ids=category_ids, payer=payer, keyword=keyword
+        category_ids=category_ids, expense_type_id=expense_type_id, payer=payer, keyword=keyword
     )
 
 @router.get("/{transaction_id}", response_model=TransactionRead)

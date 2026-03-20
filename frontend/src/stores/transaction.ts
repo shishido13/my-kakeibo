@@ -3,12 +3,15 @@ import api from '../services/api'
 
 export interface Category { id: number; name: string; }
 export interface Payer { id: number; name: string; }
+export interface ExpenseType { id: number; name: string; }
 
 export interface TransactionRecord {
   id: number;
   date: string;
   amount: number;
   category_id: number;
+  expense_type_id: number;
+  expense_type_name: string;
   shop: string;
   content: string;
   payer: string;
@@ -22,6 +25,7 @@ export const useTransactionStore = defineStore('transactions', {
     transactions: [] as TransactionRecord[],
     categories: [] as Category[],
     payers: [] as Payer[],
+    expenseTypes: [] as ExpenseType[],
     isLoading: false,
     error: null as any
   }),
@@ -46,6 +50,7 @@ export const useTransactionStore = defineStore('transactions', {
           }
         })
         this.transactions = response.data
+        this.error = null
       } catch (error) {
         this.error = error
       } finally {
@@ -64,6 +69,14 @@ export const useTransactionStore = defineStore('transactions', {
       try {
         const response = await api.get('/payers/')
         this.payers = response.data
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async fetchExpenseTypes() {
+      try {
+        const response = await api.get('/expense-types/')
+        this.expenseTypes = response.data
       } catch (error) {
         console.error(error)
       }

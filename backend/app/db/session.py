@@ -43,6 +43,21 @@ def _serialize_value(value):
 class DatabaseSession:
     def __init__(self, client):
         self.client = client
+        self._table_columns_cache: dict[str, set[str]] = {}
+
+    def _get_table_columns(self, table_name: str) -> set[str]:
+        cached = self._table_columns_cache.get(table_name)
+        if cached is not None:
+            return cached
+
+        result = self.client.execute(f"PRAGMA table_info({table_name})")
+        columns = {row[1] for row in result.rows}
+        self._table_columns_cache[table_name] = columns
+        return columns
+
+    def _get_next_id(self, table_name: str) -> int:
+        current_max = self.fetch_scalar(f"SELECT COALESCE(MAX(id), 0) FROM {table_name}") or 0
+        return int(current_max) + 1
 
     def fetch_all(self, sql: str):
         result = self.client.execute(sql)
@@ -65,11 +80,16 @@ class DatabaseSession:
         return self.client.execute(sql)
 
     def insert(self, table_name: str, values: dict):
-        columns = [key for key, value in values.items() if value is not None]
-        serialized_values = [_serialize_value(values[key]) for key in columns]
+        insert_values = {key: value for key, value in values.items() if value is not None}
+        table_columns = self._get_table_columns(table_name)
+        if 'id' in table_columns and 'id' not in insert_values:
+            insert_values['id'] = self._get_next_id(table_name)
+
+        columns = list(insert_values.keys())
+        serialized_values = [_serialize_value(insert_values[key]) for key in columns]
         sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(serialized_values)})"
         result = self.client.execute(sql)
-        return getattr(result, 'last_insert_rowid', None)
+        return insert_values.get('id') or getattr(result, 'last_insert_rowid', None)
 
     def update(self, table_name: str, ident: int, values: dict):
         assignments = [

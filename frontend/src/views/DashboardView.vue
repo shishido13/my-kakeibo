@@ -19,16 +19,34 @@ const selectedTransaction = ref<TransactionRecord | null>(null);
 const isFilterVisible = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
+const formatDateForInput = (date: Date) => {
+   const year = date.getFullYear();
+   const month = `${date.getMonth() + 1}`.padStart(2, '0');
+   const day = `${date.getDate()}`.padStart(2, '0');
+   return `${year}-${month}-${day}`;
+};
+
+const createCurrentMonthFilters = () => {
+   const today = new Date();
+   const start = new Date(today.getFullYear(), today.getMonth(), 1);
+   const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+   return {
+      start_date: formatDateForInput(start),
+      end_date: formatDateForInput(end),
+      category_ids: [] as number[],
+      payer: '',
+      expense_type_id: '' as number | '',
+      keyword: ''
+   };
+};
+
 const filters = ref({
-    start_date: '',
-    end_date: '',
-    category_ids: [] as number[],
-    payer: '',
-    keyword: ''
+    ...createCurrentMonthFilters()
 });
 
 const handleSearch = () => {
-   const activeFilters = Object.entries(filters.value).reduce<Record<string, string | number[]>>((result, [key, value]) => {
+   const activeFilters = Object.entries(filters.value).reduce<Record<string, string | number | number[]>>((result, [key, value]) => {
       if (Array.isArray(value)) {
          if (value.length > 0) {
             result[key] = value;
@@ -46,14 +64,8 @@ const handleSearch = () => {
 };
 
 const handleReset = () => {
-    filters.value = {
-        start_date: '',
-        end_date: '',
-        category_ids: [],
-        payer: '',
-        keyword: ''
-    };
-    store.fetchTransactions();
+   filters.value = createCurrentMonthFilters();
+   handleSearch();
 };
 
 const triggerFileInput = () => {
@@ -100,8 +112,9 @@ onMounted(async () => {
   await Promise.all([
     store.fetchCategories(),
     store.fetchPayers(),
-    store.fetchTransactions()
+      store.fetchExpenseTypes()
   ]);
+   handleSearch();
 });
 
 const totalAmount = computed(() => {
@@ -210,7 +223,7 @@ const formatCurrency = (amount: number) => {
          leave-to-class="transform -translate-y-2 opacity-0"
        >
          <div v-if="isFilterVisible" class="bg-white rounded-xl border border-blue-100 shadow-sm p-5 mb-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
                <div class="flex flex-col gap-1">
                   <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">開始日</label>
                   <input type="date" v-model="filters.start_date" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none hover:border-gray-300">
@@ -243,6 +256,13 @@ const formatCurrency = (amount: number) => {
                   <select v-model="filters.payer" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none h-[34px] bg-white hover:border-gray-300">
                      <option value="">すべて</option>
                      <option v-for="p in store.payers" :key="p.id" :value="p.name">{{ p.name }}</option>
+                  </select>
+               </div>
+               <div class="flex flex-col gap-1">
+                  <label class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">支出タイプ</label>
+                  <select v-model="filters.expense_type_id" class="border border-gray-200 rounded px-2 py-1.5 text-sm focus:ring-1 focus:ring-blue-400 outline-none h-[34px] bg-white hover:border-gray-300">
+                     <option value="">すべて</option>
+                     <option v-for="expenseType in store.expenseTypes" :key="expenseType.id" :value="expenseType.id">{{ expenseType.name }}</option>
                   </select>
                </div>
                <div class="flex flex-col gap-1">
