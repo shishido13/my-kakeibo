@@ -23,22 +23,22 @@ const getCategoryName = (id: number) => {
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(amount);
 };
+
 </script>
 
 <template>
-  <div class="h-full w-full">
+  <div class="h-full w-full overflow-x-auto">
     <DataTable
       :value="transactions"
       stripedRows
       scrollable
-      scrollHeight="flex"
       size="small"
       :pt="{
-        root: { class: 'w-full h-full flex flex-col' },
-        table: { class: 'min-w-full divide-y divide-gray-200 text-left border-collapse' },
-        thead: { class: 'sticky top-0 z-10 bg-gray-50' },
-        tbody: { class: 'bg-white divide-y divide-gray-200 flex-1' },
-        row: { class: 'hover:bg-blue-50/30 transition-colors group' },
+        root: { class: 'flex min-w-[760px] flex-col md:h-full md:min-w-full' },
+        table: { class: 'min-w-[760px] border-collapse text-left md:min-w-full' },
+        thead: { class: 'sticky top-0 z-10 bg-surface' },
+        tbody: { class: 'bg-panel flex-1' },
+        row: { class: 'border-b border-line transition-colors hover:bg-[#f7f9fb] group' },
         emptyMessage: { class: 'text-center' },
       }"
     >
@@ -46,22 +46,22 @@ const formatCurrency = (amount: number) => {
         field="date"
         header="日付"
         :pt="{
-          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
-          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-600 font-medium' },
+          headerCell: { class: 'border-b border-line bg-surface px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted md:px-4 md:py-2.5' },
+          bodyCell: { class: 'px-3 py-2 whitespace-nowrap text-[11px] font-medium text-ink-soft fin-table-cell-number md:px-4 md:py-2.5 md:text-[12px]' },
         }"
       />
       <Column
         header="カテゴリ"
         :pt="{
-          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
-          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-500' },
+          headerCell: { class: 'border-b border-line bg-surface px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted md:px-4 md:py-2.5' },
+          bodyCell: { class: 'px-3 py-2 whitespace-nowrap text-[11px] text-ink-soft md:px-4 md:py-2.5 md:text-[12px]' },
         }"
       >
         <template #body="{ data }">
           <Tag
             :value="getCategoryName(data.category_id)"
             :pt="{
-              root: { class: 'px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-blue-50 text-blue-600 border border-blue-100' },
+              root: { class: 'inline-flex rounded-[8px] border border-[#d6dee7] bg-[#edf2f7] px-2 py-0.5 text-[10px] font-semibold leading-4 text-[#35506a]' },
             }"
           />
         </template>
@@ -69,20 +69,20 @@ const formatCurrency = (amount: number) => {
       <Column
         header="店舗 / 内容"
         :pt="{
-          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
-          bodyCell: { class: 'px-4 py-2.5 text-xs text-gray-900 max-w-[300px]' },
+          headerCell: { class: 'border-b border-line bg-surface px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted md:px-4 md:py-2.5' },
+          bodyCell: { class: 'max-w-[240px] px-3 py-2 text-[11px] text-ink md:max-w-[320px] md:px-4 md:py-2.5 md:text-[12px]' },
         }"
       >
         <template #body="{ data }">
-          <div class="font-bold text-gray-800 truncate">{{ data.shop }}</div>
-          <div class="text-[10px] text-gray-400 truncate mt-0.5">{{ data.content }}</div>
+          <div class="truncate text-[12px] font-semibold tracking-[-0.015em] text-ink">{{ data.shop }}</div>
+          <div class="mt-0.5 truncate text-[10px] text-muted">{{ data.content }}</div>
         </template>
       </Column>
       <Column
         header="金額"
         :pt="{
-          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200 text-right' },
-          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-sm font-black text-gray-900 text-right font-mono' },
+          headerCell: { class: 'border-b border-line bg-surface px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-muted md:px-4 md:py-2.5' },
+          bodyCell: { class: 'fin-table-cell-number px-3 py-2 whitespace-nowrap text-right text-[12px] font-semibold text-ink md:px-4 md:py-2.5 md:text-[13px]' },
         }"
       >
         <template #body="{ data }">{{ formatCurrency(data.amount) }}</template>
@@ -91,22 +91,22 @@ const formatCurrency = (amount: number) => {
         field="payer"
         header="支払者"
         :pt="{
-          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
-          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-500 font-medium' },
+          headerCell: { class: 'border-b border-line bg-surface px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted md:px-4 md:py-2.5' },
+          bodyCell: { class: 'px-3 py-2 whitespace-nowrap text-[11px] font-medium text-ink-soft md:px-4 md:py-2.5 md:text-[12px]' },
         }"
       />
       <Column
         header="支出タイプ"
         :pt="{
-          headerCell: { class: 'px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 border-b border-gray-200' },
-          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-xs text-gray-500 font-medium' },
+          headerCell: { class: 'border-b border-line bg-surface px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted md:px-4 md:py-2.5' },
+          bodyCell: { class: 'px-3 py-2 whitespace-nowrap text-[11px] font-medium text-ink-soft md:px-4 md:py-2.5 md:text-[12px]' },
         }"
       >
         <template #body="{ data }">
           <Tag
             :value="data.expense_type_name"
             :pt="{
-              root: { class: 'px-2 py-0.5 inline-flex text-[10px] leading-4 font-bold rounded bg-emerald-50 text-emerald-700 border border-emerald-100' },
+              root: { class: 'inline-flex rounded-[8px] border border-[#d3dfd5] bg-[#e8efe9] px-2 py-0.5 text-[10px] font-semibold leading-4 text-[#4f6f5e]' },
             }"
           />
         </template>
@@ -114,8 +114,8 @@ const formatCurrency = (amount: number) => {
       <Column
         header=""
         :pt="{
-          headerCell: { class: 'px-4 py-3 bg-gray-50 border-b border-gray-200 w-20' },
-          bodyCell: { class: 'px-4 py-2.5 whitespace-nowrap text-right text-xs' },
+          headerCell: { class: 'w-20 border-b border-line bg-surface px-3 py-2 md:w-24 md:px-4 md:py-2.5' },
+          bodyCell: { class: 'px-3 py-2 whitespace-nowrap text-right text-[11px] md:px-4 md:py-2.5 md:text-[12px]' },
         }"
       >
         <template #body="{ data }">
@@ -127,8 +127,8 @@ const formatCurrency = (amount: number) => {
               plain
               text
               :pt="{
-                root: { class: 'text-gray-300 hover:text-blue-500 p-1.5 rounded-full hover:bg-blue-50 transition-all cursor-pointer' },
-                icon: { class: 'text-xs' },
+                root: { class: 'rounded-[8px] border border-transparent p-1.5 text-muted transition-all cursor-pointer hover:border-[#d6dee7] hover:bg-[#edf2f7] hover:text-[#35506a]' },
+                icon: { class: 'text-[11px]' },
               }"
             />
             <Button
@@ -138,8 +138,8 @@ const formatCurrency = (amount: number) => {
               plain
               text
               :pt="{
-                root: { class: 'text-gray-300 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-all cursor-pointer' },
-                icon: { class: 'text-xs' },
+                root: { class: 'rounded-[8px] border border-transparent p-1.5 text-muted transition-all cursor-pointer hover:border-[#e3d2d3] hover:bg-[#f2e7e7] hover:text-[#7b4f53]' },
+                icon: { class: 'text-[11px]' },
               }"
             />
           </div>
@@ -147,9 +147,10 @@ const formatCurrency = (amount: number) => {
       </Column>
 
       <template #empty>
-        <div class="flex flex-col items-center justify-center py-20 bg-gray-50/30 rounded-lg mx-4 my-8 border border-dashed border-gray-200">
-           <i class="pi pi-inbox text-3xl text-gray-300 mb-3"></i>
-           <span class="text-sm font-medium text-gray-400 uppercase tracking-widest">データがありません</span>
+        <div class="mx-4 my-8 flex flex-col items-center justify-center rounded-[12px] border border-dashed border-line bg-surface px-6 py-16">
+           <i class="pi pi-inbox mb-3 text-[28px] text-muted"></i>
+           <span class="fin-label">No Transactions</span>
+           <span class="mt-2 text-[12px] text-muted">表示できるデータがありません。</span>
         </div>
       </template>
     </DataTable>

@@ -488,95 +488,98 @@ watch([categoryTotals, payerNames], () => {
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(amount);
 }
+
+const actionButtonPt = {
+  root: { class: 'fin-button rounded-[10px] px-3.5 py-2 flex items-center gap-2 cursor-pointer' },
+  label: { class: 'text-[12px] font-semibold tracking-[-0.01em]' },
+  icon: { class: 'text-[12px]' }
+};
+
+const modeSwitchPt = {
+  root: { class: 'grid grid-cols-2 rounded-[10px] border border-line bg-surface p-1' },
+  button: { class: 'rounded-[8px] px-3 py-1.5 text-[12px] font-semibold text-muted transition border-none bg-transparent hover:bg-panel hover:text-ink-soft data-[p-selected=true]:bg-panel data-[p-selected=true]:text-accent-strong' },
+  label: { class: 'm-0' }
+};
 </script>
 
 <template>
-  <div class="min-h-screen bg-[radial-gradient(circle_at_top,_#f7fbff,_#eef5fb_48%,_#e9edf5)] px-3 py-4 sm:px-5 lg:px-8">
-    <div class="mx-auto flex max-w-7xl flex-col gap-3">
-      <section class="rounded-[24px] border border-white/70 bg-white/90 p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur sm:p-5">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div class="space-y-1.5">
-            <div class="inline-flex items-center rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">
-              Settlement Planner
+  <div class="fin-page min-h-screen px-3 py-3 sm:px-5 sm:py-5 lg:px-6">
+    <div class="fin-frame flex flex-col gap-3">
+      <section class="fin-panel overflow-hidden rounded-panel">
+        <div class="grid gap-3 border-b fin-hairline px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div class="space-y-1">
+            <div class="flex flex-wrap items-end gap-x-3 gap-y-1">
+              <h1 class="fin-title text-[26px] font-semibold leading-none">精算額計算</h1>
+              <span class="fin-label">Settlement Planner</span>
             </div>
-            <div>
-              <h1 class="text-[1.8rem] font-black tracking-tight text-slate-900 sm:text-[2.1rem]">精算額計算</h1>
-              <p class="mt-0.5 text-xs text-slate-500">月次の共通支出をもとに、カテゴリ別の最終負担額と受け渡し先を計算します。</p>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] fin-subtle">
+              <span>月次の共通支出をもとに、カテゴリ別の負担と受け渡し先を整理します。</span>
             </div>
           </div>
-
-          <Button
-            label="ダッシュボードへ戻る"
-            icon="pi pi-arrow-left"
-            text
-            @click="router.push('/')"
-            :pt="{
-              root: { class: 'justify-center rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50' }
-            }"
-          />
+          <Button label="ダッシュボードへ戻る" icon="pi pi-arrow-left" @click="router.push('/')" :pt="actionButtonPt" />
         </div>
 
-        <div class="mt-3 grid gap-2.5 lg:grid-cols-[280px,1fr] lg:items-center">
-          <label class="flex flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50/90 px-3 py-2.5">
-            <span class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">対象月</span>
-            <input v-model="selectedMonth" type="month" class="bg-transparent text-sm font-semibold text-slate-700 outline-none">
+        <div class="grid gap-px bg-line lg:grid-cols-[280px_1fr]">
+          <label class="fin-panel-muted flex flex-col gap-1 px-4 py-3">
+            <span class="fin-label">対象月</span>
+            <input v-model="selectedMonth" type="month" class="fin-input rounded-[10px] px-3 py-2">
           </label>
 
-          <div class="grid gap-2 sm:grid-cols-3">
-            <article class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
-              <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">集計期間</p>
-              <p class="mt-1 text-sm font-bold text-slate-900">{{ monthRange.label }}</p>
-              <p class="mt-0.5 text-[11px] text-slate-500">{{ monthRange.startDate }} 〜 {{ monthRange.endDate }}</p>
+          <div class="grid gap-px bg-line sm:grid-cols-3">
+            <article class="fin-panel-muted px-4 py-3">
+              <div class="fin-label">集計期間</div>
+              <div class="mt-1 text-[14px] font-semibold text-ink">{{ monthRange.label }}</div>
+              <div class="mt-1 text-[11px] text-muted">{{ monthRange.startDate }} 〜 {{ monthRange.endDate }}</div>
             </article>
-            <article class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
-              <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">対象支出</p>
-              <p class="mt-1 text-sm font-bold text-slate-900">共通のみ</p>
-              <p class="mt-0.5 text-[11px] text-slate-500">{{ monthlyTransactions.length }}件の取引</p>
+            <article class="fin-panel-muted px-4 py-3">
+              <div class="fin-label">対象支出</div>
+              <div class="mt-1 text-[14px] font-semibold text-ink">共通のみ</div>
+              <div class="mt-1 text-[11px] text-muted">{{ monthlyTransactions.length }}件の取引</div>
             </article>
-            <article class="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2.5">
-              <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">共通支出合計</p>
-              <p class="mt-1 text-sm font-bold text-slate-900">{{ formatCurrency(totalCommonExpense) }}</p>
-              <p class="mt-0.5 text-[11px] text-slate-500">{{ categoryTotals.length }}カテゴリ</p>
+            <article class="fin-panel-brand px-4 py-3">
+              <div class="fin-label text-white/75">共通支出合計</div>
+              <div class="mt-1 fin-value text-[20px] font-semibold text-white">{{ formatCurrency(totalCommonExpense) }}</div>
+              <div class="mt-1 text-[11px] text-white/80">{{ categoryTotals.length }}カテゴリ</div>
             </article>
           </div>
         </div>
       </section>
 
-      <div v-if="loadError" class="rounded-[20px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+      <div v-if="loadError" class="fin-panel rounded-panel border-[#e3d2d3] bg-[#f6efef] px-4 py-3 text-[13px] font-semibold text-[#7b4f53]">
         {{ loadError }}
       </div>
 
-      <div v-if="isLoading" class="rounded-[20px] border border-white/70 bg-white/90 px-4 py-10 text-center text-sm font-semibold text-slate-500 shadow-sm">
+      <div v-if="isLoading" class="fin-panel rounded-panel px-4 py-12 text-center text-[13px] font-semibold text-muted">
         共通支出データを読み込み中です。
       </div>
 
       <template v-else>
-        <div v-if="categoryTotals.length === 0" class="rounded-[20px] border border-white/70 bg-white/90 px-4 py-10 text-center text-sm font-semibold text-slate-500 shadow-sm">
+        <div v-if="categoryTotals.length === 0" class="fin-panel rounded-panel px-4 py-12 text-center text-[13px] font-semibold text-muted">
           この月の共通支出は見つかりませんでした。
         </div>
 
         <template v-else>
-          <section class="rounded-[24px] border border-white/70 bg-white/90 p-3 shadow-[0_16px_40px_rgba(15,23,42,0.07)] backdrop-blur sm:p-4">
+          <section class="fin-panel rounded-panel p-3 sm:p-4">
             <div class="mb-3 flex items-center justify-between gap-3">
               <div>
-                <h2 class="text-base font-black text-slate-900">カテゴリ別負担設定</h2>
-                <p class="text-xs text-slate-500">各カテゴリごとに、支払者別の負担割合を％または金額で入力します。</p>
+                <h2 class="text-[15px] font-semibold text-ink">カテゴリ別負担設定</h2>
+                <p class="text-[12px] text-muted">カテゴリごとに、支払者別の負担割合を％または金額で入力します。</p>
               </div>
-              <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-700">
+              <span class="rounded-[999px] border border-line bg-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                 {{ payerNames.length }} payers
               </span>
             </div>
 
             <div class="space-y-3">
-              <article v-for="summary in categoryAllocationSummaries" :key="summary.categoryId" class="rounded-[20px] border border-slate-100 bg-[linear-gradient(180deg,_#ffffff,_#f8fafc)] p-3.5 shadow-sm">
+              <article v-for="summary in categoryAllocationSummaries" :key="summary.categoryId" class="rounded-[14px] border border-line bg-[linear-gradient(180deg,_#ffffff,_#f8fafc)] p-3.5">
                 <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <div class="flex flex-wrap items-center gap-2">
-                      <h3 class="text-sm font-black text-slate-900">{{ summary.categoryName }}</h3>
-                      <span class="rounded-full bg-sky-50 px-2 py-1 text-[10px] font-bold text-sky-700">{{ formatCurrency(summary.totalAmount) }}</span>
-                      <span class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">{{ summary.transactionCount }}件</span>
+                      <h3 class="text-[14px] font-semibold text-ink">{{ summary.categoryName }}</h3>
+                      <span class="rounded-[999px] border border-line bg-panel px-2 py-1 text-[10px] font-semibold text-accent-strong">{{ formatCurrency(summary.totalAmount) }}</span>
+                      <span class="rounded-[999px] border border-line bg-surface px-2 py-1 text-[10px] font-semibold text-muted">{{ summary.transactionCount }}件</span>
                     </div>
-                    <p class="mt-1 text-[11px]" :class="summary.isValid ? 'text-emerald-600' : 'text-rose-500'">
+                    <p class="mt-1 text-[11px]" :class="summary.isValid ? 'text-positive' : 'text-[#7b4f53]'">
                       {{ summary.helperText }}
                     </p>
                   </div>
@@ -588,37 +591,32 @@ function formatCurrency(amount: number) {
                       optionLabel="label"
                       optionValue="value"
                       @update:modelValue="(value) => updateAllocationMode(summary.categoryId, value, summary.totalAmount)"
-                      :pt="{
-                        root: { class: 'grid grid-cols-2 rounded-xl bg-slate-100 p-1' },
-                        button: { class: 'rounded-lg px-3 py-1.5 text-xs font-bold text-slate-500 transition border-none bg-transparent hover:bg-white hover:text-slate-700 data-[p-selected=true]:bg-white data-[p-selected=true]:text-slate-900 data-[p-selected=true]:shadow-sm' },
-                        label: { class: 'm-0' }
-                      }"
+                      :pt="modeSwitchPt"
                     />
                     <Button
                       label="等分"
                       icon="pi pi-percentage"
-                      text
                       @click="applyEqualSplit(summary.categoryId, summary.totalAmount)"
-                      :pt="{ root: { class: 'rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm' } }"
+                      :pt="actionButtonPt"
                     />
                   </div>
                 </div>
 
                 <div class="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-                  <label v-for="payer in payerNames" :key="`${summary.categoryId}-${payer}`" class="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                    <span class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{{ payer }}</span>
+                  <label v-for="payer in payerNames" :key="`${summary.categoryId}-${payer}`" class="rounded-[12px] border border-line bg-panel px-3 py-2">
+                    <span class="fin-label">{{ payer }}</span>
                     <div class="mt-1.5 flex items-end gap-2">
                       <input
                         :value="allocations[summary.categoryId]?.shares[payer] ?? ''"
                         type="number"
                         min="0"
                         :step="summary.mode === 'percentage' ? '0.1' : '1'"
-                        class="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none"
+                        class="fin-input w-full rounded-[8px] px-2 py-1 text-[12px] font-semibold text-ink"
                         @input="handleShareInput(summary.categoryId, payer, $event)"
                       >
-                      <span class="pb-0.5 text-xs font-bold text-slate-400">{{ summary.mode === 'percentage' ? '%' : '円' }}</span>
+                      <span class="pb-0.5 text-[11px] font-semibold text-muted">{{ summary.mode === 'percentage' ? '%' : '円' }}</span>
                     </div>
-                    <p class="mt-1 text-[11px] text-slate-500">最終負担 {{ formatCurrency(summary.burdenByPayer[payer] ?? 0) }}</p>
+                    <p class="mt-1 text-[11px] text-muted">最終負担 {{ formatCurrency(summary.burdenByPayer[payer] ?? 0) }}</p>
                   </label>
                 </div>
               </article>
@@ -626,13 +624,13 @@ function formatCurrency(amount: number) {
           </section>
 
           <div class="grid gap-3 xl:grid-cols-[1.15fr,0.85fr]">
-            <section class="rounded-[24px] border border-white/70 bg-white/90 p-3.5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] backdrop-blur sm:p-4">
+            <section class="fin-panel rounded-panel p-3.5 sm:p-4">
               <div class="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <h2 class="text-base font-black text-slate-900">支払額と最終負担額</h2>
-                  <p class="text-xs text-slate-500">実際の支払い合計とカテゴリ配分後の最終負担額との差分です。</p>
+                  <h2 class="text-[15px] font-semibold text-ink">支払額と最終負担額</h2>
+                  <p class="text-[12px] text-muted">実際の支払い合計とカテゴリ配分後の最終負担額との差分です。</p>
                 </div>
-                <span class="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em]" :class="isAllocationValid ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'">
+                <span class="rounded-[999px] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em]" :class="isAllocationValid ? 'fin-status-positive border' : 'border border-[#e3d2d3] bg-[#f6efef] text-[#7b4f53]'">
                   {{ isAllocationValid ? 'ready' : 'check inputs' }}
                 </span>
               </div>
@@ -641,18 +639,18 @@ function formatCurrency(amount: number) {
                 <table class="min-w-full border-separate border-spacing-y-2">
                   <thead>
                     <tr>
-                      <th class="px-3 py-1 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">支払者</th>
-                      <th class="px-3 py-1 text-right text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">支払合計</th>
-                      <th class="px-3 py-1 text-right text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">最終負担額</th>
-                      <th class="px-3 py-1 text-right text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">差分</th>
+                      <th class="px-3 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">支払者</th>
+                      <th class="px-3 py-1 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">支払合計</th>
+                      <th class="px-3 py-1 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">最終負担額</th>
+                      <th class="px-3 py-1 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">差分</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="row in payerSettlementRows" :key="row.payer" class="rounded-xl bg-slate-50">
-                      <td class="rounded-l-xl px-3 py-3 text-sm font-bold text-slate-800">{{ row.payer }}</td>
-                      <td class="px-3 py-3 text-right text-sm font-semibold text-slate-600">{{ formatCurrency(row.paid) }}</td>
-                      <td class="px-3 py-3 text-right text-sm font-semibold text-slate-600">{{ formatCurrency(row.burden) }}</td>
-                      <td class="rounded-r-xl px-3 py-3 text-right text-sm font-black" :class="row.difference > 0 ? 'text-emerald-600' : row.difference < 0 ? 'text-rose-500' : 'text-slate-400'">
+                    <tr v-for="row in payerSettlementRows" :key="row.payer" class="rounded-[12px] bg-surface">
+                      <td class="rounded-l-[12px] px-3 py-3 text-[13px] font-semibold text-ink">{{ row.payer }}</td>
+                      <td class="px-3 py-3 text-right text-[13px] font-semibold text-ink-soft">{{ formatCurrency(row.paid) }}</td>
+                      <td class="px-3 py-3 text-right text-[13px] font-semibold text-ink-soft">{{ formatCurrency(row.burden) }}</td>
+                      <td class="rounded-r-[12px] px-3 py-3 text-right text-[13px] font-semibold" :class="row.difference > 0 ? 'text-positive' : row.difference < 0 ? 'text-[#7b4f53]' : 'text-muted'">
                         {{ row.difference > 0 ? '+' : '' }}{{ formatCurrency(row.difference) }}
                       </td>
                     </tr>
@@ -661,33 +659,33 @@ function formatCurrency(amount: number) {
               </div>
             </section>
 
-            <section class="rounded-[24px] border border-white/70 bg-white/90 p-3.5 shadow-[0_16px_40px_rgba(15,23,42,0.07)] backdrop-blur sm:p-4">
+            <section class="fin-panel rounded-panel p-3.5 sm:p-4">
               <div class="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <h2 class="text-base font-black text-slate-900">受け渡し結果</h2>
-                  <p class="text-xs text-slate-500">誰が誰にいくら渡すかを、差分から自動算出します。</p>
+                  <h2 class="text-[15px] font-semibold text-ink">受け渡し結果</h2>
+                  <p class="text-[12px] text-muted">誰が誰にいくら渡すかを差分から自動算出します。</p>
                 </div>
-                <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-700">
+                <span class="rounded-[999px] border border-line bg-surface px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-soft">
                   {{ settlementTransfers.length }} transfers
                 </span>
               </div>
 
-              <div v-if="!isAllocationValid" class="rounded-xl border border-dashed border-rose-200 bg-rose-50 px-4 py-6 text-sm font-semibold text-rose-500">
+              <div v-if="!isAllocationValid" class="rounded-[12px] border border-dashed border-[#e3d2d3] bg-[#f6efef] px-4 py-6 text-[13px] font-semibold text-[#7b4f53]">
                 カテゴリごとの負担入力合計を正しくそろえると、精算結果を表示できます。
               </div>
 
-              <div v-else-if="settlementTransfers.length === 0" class="rounded-xl border border-dashed border-emerald-200 bg-emerald-50 px-4 py-6 text-sm font-semibold text-emerald-600">
+              <div v-else-if="settlementTransfers.length === 0" class="rounded-[12px] border border-dashed border-[#cddfd3] bg-[#e8f5ee] px-4 py-6 text-[13px] font-semibold text-positive">
                 精算は不要です。全員の支払額と最終負担額が一致しています。
               </div>
 
               <div v-else class="space-y-2">
-                <article v-for="transfer in settlementTransfers" :key="`${transfer.from}-${transfer.to}-${transfer.amount}`" class="rounded-xl border border-slate-100 bg-[linear-gradient(135deg,_#f8fafc,_#eef4ff)] px-3.5 py-3 shadow-sm">
+                <article v-for="transfer in settlementTransfers" :key="`${transfer.from}-${transfer.to}-${transfer.amount}`" class="rounded-[12px] border border-line bg-[linear-gradient(135deg,_#f8fafc,_#eef4ff)] px-3.5 py-3">
                   <div class="flex items-center justify-between gap-3">
                     <div>
-                      <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">Transfer</p>
-                      <p class="mt-1 text-sm font-black text-slate-900">{{ transfer.from }} → {{ transfer.to }}</p>
+                      <p class="fin-label">Transfer</p>
+                      <p class="mt-1 text-[13px] font-semibold text-ink">{{ transfer.from }} → {{ transfer.to }}</p>
                     </div>
-                    <p class="text-base font-black text-indigo-600">{{ formatCurrency(transfer.amount) }}</p>
+                    <p class="fin-value text-[16px] font-semibold text-accent-strong">{{ formatCurrency(transfer.amount) }}</p>
                   </div>
                 </article>
               </div>

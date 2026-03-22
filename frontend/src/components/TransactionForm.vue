@@ -138,34 +138,34 @@ const closeModal = () => {
 };
 
 const dialogPt = {
-  root: { class: 'bg-white rounded-lg shadow-xl w-[calc(100vw-1rem)] max-w-[36rem] sm:w-full overflow-hidden' },
-  header: { class: 'bg-blue-600 px-4 py-3 sm:px-5 sm:py-3.5 flex justify-between items-center text-white' },
-  title: { class: 'text-base sm:text-lg font-bold text-white' },
-  closeButton: { class: 'text-white hover:text-gray-200 focus:outline-none rounded-full w-7 h-7 flex items-center justify-center' },
-  closeIcon: { class: 'text-white' },
-  content: { class: 'p-3.5 space-y-3 sm:p-4 sm:space-y-3.5' },
+  root: { class: 'fin-panel w-[calc(100vw-0.75rem)] max-w-[34rem] overflow-hidden rounded-[14px] sm:w-full max-h-[calc(100vh-1rem)]' },
+  header: { class: 'border-b fin-hairline bg-surface px-3.5 py-2.5 sm:px-4 sm:py-3 flex justify-between items-center' },
+  title: { class: 'text-[15px] sm:text-[16px] font-semibold tracking-[-0.02em] text-ink' },
+  closeButton: { class: 'text-muted hover:text-ink focus:outline-none rounded-full w-7 h-7 flex items-center justify-center' },
+  closeIcon: { class: 'text-[12px]' },
+  content: { class: 'bg-panel p-3 space-y-2.5 sm:p-3.5 sm:space-y-3 max-h-[calc(100vh-5.5rem)] overflow-y-auto' },
 };
 
 const inputPt = {
-  root: { class: 'w-full border-gray-300 border shadow-sm px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm' },
+  root: { class: 'fin-input min-h-[34px] rounded-[9px] px-2.5 py-1.5 text-[12px]' },
 };
 
 const selectPt = {
-  root: { class: 'w-full min-h-[38px] sm:min-h-[40px] border-gray-300 border shadow-sm px-3 py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm cursor-pointer flex items-center justify-between' },
-  label: { class: 'flex-1 text-sm text-gray-700 truncate' },
-  dropdown: { class: 'ml-2 text-gray-400' },
-  panel: { class: 'bg-white border border-gray-200 shadow-lg mt-1 z-50 text-sm' },
+  root: { class: 'fin-select min-h-[34px] rounded-[9px] px-2.5 py-1 text-[12px] cursor-pointer flex items-center justify-between' },
+  label: { class: 'flex-1 truncate text-[12px] text-ink-soft' },
+  dropdown: { class: 'ml-2 text-muted' },
+  panel: { class: 'fin-panel mt-1 z-50 rounded-[12px] text-[12px]' },
   list: { class: 'py-1 max-h-60 overflow-auto' },
-  option: { class: 'px-3 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 data-[p-focused=true]:bg-blue-50 data-[p-selected=true]:bg-blue-100 data-[p-selected=true]:text-blue-700' },
+  option: { class: 'px-3 py-1.5 text-[12px] text-ink-soft hover:bg-[#eef2f6] cursor-pointer data-[p-focused=true]:bg-[#eef2f6] data-[p-selected=true]:bg-[#e7eef5] data-[p-selected=true]:text-accent-strong' },
 };
 
 const datePt = {
   root: { class: 'w-full border' },
-  input: { class: 'w-full border border-gray-300 shadow-sm px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm' },
+  input: { class: 'fin-input min-h-[34px] rounded-[9px] px-2.5 py-1.5 text-[12px]' },
 };
 
 const textareaPt = {
-  root: { class: 'w-full border border-gray-300 shadow-sm px-3 py-2 sm:py-1.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none' },
+  root: { class: 'fin-textarea w-full min-h-[68px] rounded-[9px] px-2.5 py-1.5 text-[12px] resize-none' },
 };
 </script>
 
@@ -178,10 +178,10 @@ const textareaPt = {
     :pt="dialogPt"
     @update:visible="(v) => !v && closeModal()"
   >
-    <form @submit.prevent="submitForm" class="space-y-3 sm:space-y-3.5">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+    <form @submit.prevent="submitForm" class="space-y-2.5 sm:space-y-3">
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2.5">
         <div>
-          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">日付</label>
+          <label class="fin-label mb-0.5 block">日付</label>
           <DatePicker
             v-model="formData.date"
             dateFormat="yy-mm-dd"
@@ -190,7 +190,7 @@ const textareaPt = {
           />
         </div>
         <div>
-          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">金額 (円)</label>
+          <label class="fin-label mb-0.5 block">金額</label>
           <InputNumber
             v-model="formData.amount"
             :min="1"
@@ -198,40 +198,41 @@ const textareaPt = {
             :useGrouping="false"
             required
             class="border"
-            :pt="{ root: { class: 'w-full' }, input: inputPt.root }"
+            :pt="{ root: { class: 'w-full' }, input: `${inputPt.root.class} fin-table-cell-number text-right` }"
           />
         </div>
       </div>
-    
-      <div>
-        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">カテゴリ</label>
-        <Select
-          v-model="formData.category_id"
-          :options="store.categories"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="選択してください"
-          required
-          :pt="selectPt"
-        />
+
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2.5">
+        <div>
+          <label class="fin-label mb-0.5 block">カテゴリ</label>
+          <Select
+            v-model="formData.category_id"
+            :options="store.categories"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="選択してください"
+            required
+            :pt="selectPt"
+          />
+        </div>
+        <div>
+          <label class="fin-label mb-0.5 block">支出タイプ</label>
+          <Select
+            v-model="formData.expense_type_id"
+            :options="store.expenseTypes"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="選択してください"
+            required
+            :pt="selectPt"
+          />
+        </div>
       </div>
 
-      <div>
-        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">支出タイプ</label>
-        <Select
-          v-model="formData.expense_type_id"
-          :options="store.expenseTypes"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="選択してください"
-          required
-          :pt="selectPt"
-        />
-      </div>
-    
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-2.5">
         <div>
-          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">店舗名</label>
+          <label class="fin-label mb-0.5 block">店舗名</label>
           <InputText
             v-model="formData.shop"
             required
@@ -240,7 +241,7 @@ const textareaPt = {
           />
         </div>
         <div>
-          <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">商品・内容</label>
+          <label class="fin-label mb-0.5 block">商品・内容</label>
           <InputText
             v-model="formData.content"
             required
@@ -249,60 +250,61 @@ const textareaPt = {
           />
         </div>
       </div>
-    
-      <div>
-        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">支払者</label>
-        <Select
-          v-model="formData.payer"
-          :options="store.payers"
-          optionLabel="name"
-          optionValue="name"
-          placeholder="選択してください"
-          required
-          :pt="selectPt"
-        />
+
+      <div class="grid grid-cols-1 gap-2 sm:grid-cols-[180px_minmax(0,1fr)] sm:gap-2.5">
+        <div>
+          <label class="fin-label mb-0.5 block">支払者</label>
+          <Select
+            v-model="formData.payer"
+            :options="store.payers"
+            optionLabel="name"
+            optionValue="name"
+            placeholder="選択してください"
+            required
+            :pt="selectPt"
+          />
+        </div>
+        <div>
+          <label class="fin-label mb-0.5 block">備考</label>
+          <Textarea
+            v-model="formData.description"
+            :rows="2"
+            :pt="textareaPt"
+          />
+        </div>
       </div>
-    
-      <div>
-        <label class="block text-[11px] sm:text-xs font-medium text-gray-700 mb-0.5">備考</label>
-        <Textarea
-          v-model="formData.description"
-          :rows="2"
-          :pt="textareaPt"
-        />
-      </div>
-    
-      <div class="flex flex-col gap-3 pt-3 border-t border-gray-200 mt-1 sm:flex-row sm:items-center sm:justify-between">
+
+      <div class="mt-1 flex flex-col gap-2 border-t fin-hairline pt-2.5 sm:flex-row sm:items-center sm:justify-between">
         <label
           v-if="showContinuousOption"
-          class="flex items-center text-sm text-gray-600 gap-2 cursor-pointer w-full sm:w-auto"
+          class="flex w-full cursor-pointer items-center gap-2 text-[12px] text-ink-soft sm:w-auto"
         >
           <Checkbox
             v-model="isContinuous"
             binary
             :pt="{
               root: { class: 'flex items-center' },
-              box: { class: 'w-4 h-4 rounded border border-gray-300 flex items-center justify-center cursor-pointer data-[p-checked=true]:bg-blue-600 data-[p-checked=true]:border-blue-600' },
+              box: { class: 'w-4 h-4 rounded border border-line flex items-center justify-center cursor-pointer data-[p-checked=true]:bg-accent data-[p-checked=true]:border-accent' },
               icon: { class: 'text-white text-xs' },
             }"
           />
           連続入力する
         </label>
-        <span v-else class="text-xs text-gray-400">既存の取引を更新します</span>
+        <span v-else class="text-[11px] text-muted">既存の取引を更新します</span>
         <div class="flex w-full gap-2 sm:w-auto">
           <Button
             type="button"
             label="キャンセル"
             @click="closeModal"
             :pt="{
-              root: { class: 'flex-1 sm:flex-none px-3.5 py-2 sm:py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 shadow-sm hover:bg-gray-50 cursor-pointer' },
+              root: { class: 'fin-button flex-1 rounded-[9px] px-3 py-1.5 text-[12px] sm:flex-none cursor-pointer' },
             }"
           />
           <Button
             type="submit"
             :label="submitLabel"
             :pt="{
-              root: { class: 'flex-1 sm:flex-none px-3.5 py-2 sm:py-1.5 text-sm font-medium text-white bg-blue-600 border border-transparent shadow-sm hover:bg-blue-700 cursor-pointer' },
+              root: { class: 'fin-button fin-button-primary flex-1 rounded-[9px] px-3 py-1.5 text-[12px] sm:flex-none cursor-pointer' },
             }"
           />
         </div>
